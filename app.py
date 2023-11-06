@@ -1,8 +1,5 @@
-from flask import Flask, request, session, abort
-from flask import redirect, url_for, render_template, flash
-from flask_wtf import FlaskForm
-from wtforms.fields import StringField, SubmitField, SelectField, IntegerField
-from wtforms.validators import InputRequired, NumberRange
+from flask import Flask
+from flask import redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 # identify the script directory to locate the database and helper files
