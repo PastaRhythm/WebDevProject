@@ -10,6 +10,9 @@ sys.path.append(scriptdir)
 # identify the full path to the database file
 dbfile = os.path.join(scriptdir, "app.sqlite3")
 
+# load docker functions
+from docker_functions.docker_site_funcs import *
+
 # configure this web application
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -49,7 +52,8 @@ def dashboard():
 
 @app.get("/test_create_route/")
 def test_create():
-	return "Test create"
+	success = create_site()
+	return "test create"
 
 
 if __name__ == '__main__':
