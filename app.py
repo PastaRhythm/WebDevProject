@@ -47,5 +47,10 @@ def dashboard():
     return render_template('dashboard.html')
 
 
+@app.get("/test_create_route/")
+def test_create():
+	return "Test create"
+
+
 if __name__ == '__main__':
 	app.run()
