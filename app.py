@@ -21,6 +21,9 @@ with open(pepfile, 'rb') as fin:
 	pepper_key = fin.read()
 pwd_hasher = UpdatedHasher(pepper_key)
 
+# load docker functions
+from docker_functions.docker_site_funcs import *
+
 # configure this web application
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -124,6 +127,12 @@ def get_logout():
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+
+@app.get("/test_create_route/")
+def test_create():
+	success = create_site()
+	return "test create"
 
 
 if __name__ == '__main__':
