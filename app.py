@@ -3,6 +3,7 @@ from flask import redirect, url_for, render_template
 from flask import request, session, flash
 from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
+import zipfile, shutil
 
 #database
 from flask_sqlalchemy import SQLAlchemy
@@ -70,6 +71,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Import from various files
 from database_manager import User, Website, db, seed_db
 from forms.loginForms import RegisterForm, LoginForm
+from forms.siteForms import NewSiteForm, UploadFilesForm
 from docker_functions.docker_site_funcs import *
 
 #init database
@@ -164,7 +166,71 @@ def get_logout():
 @app.get("/dashboard/")
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+	sites = current_user.websites
+	return render_template('dashboard.html', sites=sites)
+
+@app.get("/new_site/")
+@login_required
+def new_site():
+	form = NewSiteForm()
+	return render_template('new_site.html', form=form)
+
+@app.post("/new_site/")
+@login_required
+def handle_new_site():
+	form = UploadFilesForm()
+	if form.validate():
+		success = create_site(current_user, form.host_name)
+		if (success):
+			# TODO: Have some nicer confirmation after creation
+			return redirect(url_for('dashboard'))
+		else:
+			flash("Site could not be created")
+			return redirect(url_for('new_site'))
+	else:
+		# flash error messages and redirect to get form again
+		for field, error in form.errors.items():
+			flash(f"{field}: {error}")
+		return redirect(url_for('new_site'))
+
+
+@app.get("/website/<int:site_id>/")
+@login_required
+def view_site(site_id: int):
+	site = Website.query.get(site_id)
+	return render_template("site_view.html", site=site)
+
+@app.get("/upload_files/<int:site_id>/")
+@login_required
+def upload_files(site_id: int):
+	site = Website.query.get(site_id)
+	form = UploadFilesForm()
+	return render_template('upload_files.html', form=form, site=site)
+
+@app.post("/upload_files/<int:site_id>/")
+@login_required
+def handle_upload_files(site_id: int):
+	form = UploadFilesForm()
+	if form.validate():
+		site: Website = Website.query.get(site_id)
+
+		vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
+
+		# Remove all files in the path
+		#TODO: TEST THIS IN AN ENVIRONMENT BEFORE USING!!!
+		# shutil.rmtree(vol_path)
+		# os.makedirs(vol_path)
+
+		# Get the file, unzip it, put the contents in the proper volume
+		with zipfile.ZipFile(form.zip_file.data, 'r') as zip_ref:
+			zip_ref.extractall(vol_path)
+
+		return redirect(url_for("view_site", site_id=site_id))
+	else: # if the form was invalid
+		# flash error messages and redirect to get form again
+		for field, error in form.errors.items():
+			flash(f"{field}: {error}")
+		return redirect(url_for('upload_files'))
 
 
 @app.get("/test_create_route/")
