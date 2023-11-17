@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block body %}
+
+<a href="/sites/">Back to Sites</a>
+<br>
+
+<h1>{{site.name}}</h1>
+<br>
+
+<a href="/upload_files/{{site.id}}/">Upload Files</a>
+<br>
+<a href="{{site.host_name}}">Visit Site</a>
+
+{% endblock %}

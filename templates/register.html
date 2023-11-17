@@ -2,6 +2,31 @@
 
 {% block body %}
 
-register
+<a href="/">Cancel</a>
+
+<form method="POST">
+    {{form.hidden_tag()}}
+
+    {{form.email.label}}
+    {{form.email()}}
+    <br>
+    {{form.password.label}}
+    {{form.password()}}
+    <br>
+    {{form.confirm_password.label}}
+    {{form.confirm_password()}}
+    <br>
+    {{form.fname.label}}
+    {{form.fname()}}
+    <br>
+    {{form.lname.label}}
+    {{form.lname()}}
+    <br>
+    {{form.billing_address.label}}
+    {{form.billing_address()}}
+    <br>
+
+    {{form.submit()}}
+</form>
 
 {% endblock %}

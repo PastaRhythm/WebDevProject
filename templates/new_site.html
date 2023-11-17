@@ -2,18 +2,18 @@
 
 {% block body %}
 
-<a href="/">Cancel</a>
+<a href="/sites/">Cancel</a>
+<br>
+
+<h1>New Website</h1>
 
 <form method="POST">
     {{form.hidden_tag()}}
 
-    {{form.email.label}}
-    {{form.email()}}
+    {{form.host_name.label}}
+    {{form.host_name()}}
     <br>
-    {{form.password.label}}
-    {{form.password()}}
-    <br>
-    
+
     {{form.submit()}}
 </form>
 

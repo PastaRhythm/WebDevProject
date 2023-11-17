@@ -2,6 +2,10 @@
 
 {% block body %}
 
+<a href="/">Back to Home</a>
+<br>
+<a href="/new_site/">Add New Page</a>
+
 <fieldset>
     <legend>Websites</legend>
 
@@ -60,7 +64,7 @@
             const site_visit = document.createElement('td')
             const site_link = document.createElement('a')
             site_link.innerText = "Visit"
-            site_link.href = website.hostname
+            site_link.href = "http://" + website.hostname
             site_visit.append(site_link)
             tr.appendChild(site_visit)
 
