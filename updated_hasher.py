@@ -27,6 +27,15 @@ class UpdatedHasher:
     def random_pepper() -> bytes:
         return Fernet.generate_key()
     
+import os, sys
+scriptdir = os.path.dirname(os.path.abspath(__file__))
+pepfile = os.path.join(scriptdir, "pepper.bin")
+
+# Read the pepper and set up the password hasher
+with open(pepfile, 'rb') as fin:
+	pepper_key = fin.read()
+pwd_hasher = UpdatedHasher(pepper_key)
+    
 if __name__ == '__main__':
     conf = input("Are you sure you want to generate a new pepper? (Y/n): ")
     if conf == "Y":
