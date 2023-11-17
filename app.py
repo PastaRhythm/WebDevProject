@@ -177,5 +177,5 @@ def test_create():
 	return "test create"
 
 if __name__ == '__main__':
-	seed_db(app)
+	#seed_db(app)
 	app.run()
