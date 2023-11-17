@@ -1,0 +1,73 @@
+{% extends "main.html" %}
+
+{% block body %}
+
+<fieldset>
+    <legend>Websites</legend>
+
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Site Name</th>
+                <th>Site ID</th>
+                <th>Image</th>
+                <th>Visit</th>
+            </tr>
+        </thead>
+        <tbody id="user_websites_tbody"></tbody>
+    </table>
+</fieldset>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async ()=>{
+        fetch_user_sites();
+    })
+
+
+    async function fetch_user_sites(){
+        const endpoint = `{{ url_for('sites_json') }}`
+        console.log(endpoint)
+
+        //get data
+        const response = await fetch(endpoint)
+        const websites = await validateJSON(response)
+        console.log(websites)
+        console.log("done")
+
+        //insert data into list
+        const user_websites_tbody = document.getElementById('user_websites_tbody')
+        websites.map((website)=>{
+            //create row
+            const tr = document.createElement('tr')
+            
+            //add site name col
+            const site_name = document.createElement('td')
+            site_name.innerText = website.name
+            tr.appendChild(site_name)
+
+            //add site id col
+            const site_id = document.createElement('td')
+            site_id.innerText = website.id
+            tr.appendChild(site_id)
+
+            //add image col
+            const site_image = document.createElement('td')
+            site_image.innerText = website.image
+            tr.appendChild(site_image)
+
+            //add visit link col
+            const site_visit = document.createElement('td')
+            const site_link = document.createElement('a')
+            site_link.innerText = "Visit"
+            site_link.href = website.hostname
+            site_visit.append(site_link)
+            tr.appendChild(site_visit)
+
+            //add tr to body
+            user_websites_tbody.appendChild(tr)
+        })
+    }
+</script>
+
+{% endblock %}
