@@ -1,3 +1,4 @@
+import string
 from flask import Flask
 from flask import redirect, url_for, render_template
 from flask import request, session, flash
@@ -15,6 +16,7 @@ dbfile = os.path.join(scriptdir, "app.sqlite3")
 sys.path.append(scriptdir)
 
 import docker
+import json
 
 from constants import TRAEFIK_CONTAINER_NAME
 
@@ -232,11 +234,37 @@ def handle_upload_files(site_id: int):
 			flash(f"{field}: {error}")
 		return redirect(url_for('upload_files'))
 
+#routes for showing details about a user's sites
+@app.get('/sites/')
+def show_sites():
+	return render_template('sites.html')
+
+@app.get('/sites_data/')
+def sites_json():
+	#get current user
+	user = User.query.first()	#TODO: get the currently autheticated user
+
+	#load all site models associated with that user
+	websites = user.websites
+
+	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
+			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
+			'user_id': website.user_id
+		}
+		for website in websites
+	])
+
+	#return the json string
+	return json_data
+	
 
 @app.get("/test_create_route/")
 def test_create():
 
-	user = User.query.get(int(1))
+	user = User.query.get(int(1))	#TODO: get the currently autheticated user
 	hostname = 'host1.dockertest.internal'
 
 	success = create_site(user, hostname)
