@@ -166,6 +166,29 @@ def get_logout():
 def dashboard():
     return render_template('dashboard.html')
 
+#routes for showing details about a user's sites
+@app.get('/sites/')
+def show_sites():
+	#get current user
+
+	#load all site models associated with that user
+
+	#jsonify that data
+
+	#include the json
+	return render_template('sites.html')
+
+@app.get('/sites_data/')
+def sites_json():
+	#get current user
+
+	#load all site models associated with that user
+
+	#jsonify that data
+
+	#return the json
+
+	return "Sites json"
 
 @app.get("/test_create_route/")
 def test_create():
