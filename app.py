@@ -176,7 +176,7 @@ def show_sites():
 @app.get('/sites_data/')
 def sites_json():
 	#get current user
-	user = User.query.first()	#TODO: change this to get the current user
+	user = User.query.first()	#TODO: get the currently autheticated user
 
 	#load all site models associated with that user
 	websites = user.websites
@@ -198,7 +198,7 @@ def sites_json():
 @app.get("/test_create_route/")
 def test_create():
 
-	user = User.query.get(int(1))
+	user = User.query.get(int(1))	#TODO: get the currently autheticated user
 	hostname = 'host1.dockertest.internal'
 
 	success = create_site(user, hostname)
