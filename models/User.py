@@ -1,4 +1,5 @@
-from app import db, pwd_hasher
+from database_manager import db
+from updated_hasher import pwd_hasher
 from flask_login import UserMixin
 
 class User(UserMixin, db.Model):

@@ -1,37 +1,24 @@
 from flask import Flask
 from flask import redirect, url_for, render_template
 from flask import request, session, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_required
+from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 
-from updated_hasher import UpdatedHasher
-from forms.loginForms import RegisterForm, LoginForm
-from models.User import User
-
-# identify the script directory to locate the database, pepper, and helper files
+# Add this directory to the Python path
 import os, sys
 scriptdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(scriptdir)
-dbfile = os.path.join(scriptdir, "app.sqlite3")
-pepfile = os.path.join(scriptdir, "pepper.bin")
-
-# Read the pepper and set up the password hasher
-with open(pepfile, 'rb') as fin:
-	pepper_key = fin.read()
-pwd_hasher = UpdatedHasher(pepper_key)
-
-# load docker functions
-from docker_functions.docker_site_funcs import *
 
 # configure this web application
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+# Import from various files
+from database_manager import db
+from models.User import User
+from forms.loginForms import RegisterForm, LoginForm
+from docker_functions.docker_site_funcs import *
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -42,11 +29,6 @@ login_manager.login_view = 'login' # type: ignore
 @login_manager.user_loader
 def load_user(uid: int) -> User:
     return User.query.get(int(uid))
-
-# Leave this commented out if you don't want the database to be deleted.
-with app.app_context():
-	db.drop_all()
-	db.create_all()
 
 @app.route("/")
 def index():
@@ -116,7 +98,7 @@ def handle_register():
 			flash(f"{field}: {error}")
 		return redirect(url_for('register'))
 
-@app.get("")
+@app.get("/logout/")
 @login_required
 def get_logout():
 	logout_user()
@@ -133,7 +115,6 @@ def dashboard():
 def test_create():
 	success = create_site()
 	return "test create"
-
 
 if __name__ == '__main__':
 	app.run()
