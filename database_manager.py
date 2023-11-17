@@ -38,6 +38,7 @@ class Website(db.Model):
     docker_id = db.Column(db.Unicode, nullable=False)
     volume_path = db.Column(db.Unicode, nullable=False)
     image = db.Column(db.Unicode, nullable=False)
+    url = db.Column(db.Unicode, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
 
 if __name__ == '__main__':
