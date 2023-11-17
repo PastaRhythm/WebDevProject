@@ -1,3 +1,4 @@
+import string
 from flask import Flask
 from flask import redirect, url_for, render_template
 from flask import request, session, flash
@@ -14,6 +15,7 @@ dbfile = os.path.join(scriptdir, "app.sqlite3")
 sys.path.append(scriptdir)
 
 import docker
+import json
 
 from constants import TRAEFIK_CONTAINER_NAME
 
@@ -169,26 +171,29 @@ def dashboard():
 #routes for showing details about a user's sites
 @app.get('/sites/')
 def show_sites():
-	#get current user
-
-	#load all site models associated with that user
-
-	#jsonify that data
-
-	#include the json
 	return render_template('sites.html')
 
 @app.get('/sites_data/')
 def sites_json():
 	#get current user
+	user = User.query.first()	#TODO: change this to get the current user
 
 	#load all site models associated with that user
+	websites = user.websites
 
 	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
+			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
+			'user_id': website.user_id
+		}
+		for website in websites
+	])
 
-	#return the json
-
-	return "Sites json"
+	#return the json string
+	return json_data
+	
 
 @app.get("/test_create_route/")
 def test_create():
