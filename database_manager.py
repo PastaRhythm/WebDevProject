@@ -6,14 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from updated_hasher import pwd_hasher
 
 import os, sys
-scriptdir = os.path.dirname(os.path.abspath(__file__))
-dbfile = os.path.join(scriptdir, "app.sqlite3")
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     __tablename__ = 'Users'
