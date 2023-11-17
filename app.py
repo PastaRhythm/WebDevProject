@@ -4,12 +4,18 @@ from flask import request, session, flash
 from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 
+#database
+from flask_sqlalchemy import SQLAlchemy
+
 # Add this directory to the Python path
 import os, sys
 scriptdir = os.path.dirname(os.path.abspath(__file__))
+dbfile = os.path.join(scriptdir, "app.sqlite3")
 sys.path.append(scriptdir)
 
 import docker
+
+from constants import TRAEFIK_CONTAINER_NAME
 
 #traefik router class
 class TraefikApp(Flask):
@@ -19,15 +25,14 @@ class TraefikApp(Flask):
 
 		#check if the traefik container exists
 		client = docker.from_env()
-		traefik_container_name = "traefik-router"
 		try:
-			_ = client.containers.get(traefik_container_name)
+			_ = client.containers.get(TRAEFIK_CONTAINER_NAME)
 		except docker.errors.NotFound as e:
 			print("Creating traefik container!")
 			try:
 				_ = client.containers.run(
 					"traefik:latest",
-					name = traefik_container_name,
+					name = TRAEFIK_CONTAINER_NAME,
 					detach=True,
 					ports={'80/tcp': '80'},
 					command = [
@@ -37,7 +42,7 @@ class TraefikApp(Flask):
 						"--entrypoints.web.address=:80"
 					],
 					labels = {
-						'traefik.enable': 'True',
+						'traefik.enable': 'true',
 						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
 						'traefik.http.routers.traefik.entrypoints': 'web',
 						'traefik.http.routers.traefik.service': 'api@internal'
@@ -59,11 +64,16 @@ class TraefikApp(Flask):
 app = TraefikApp(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
-from database_manager import db, User, Website
+from database_manager import User, Website, db
 from forms.loginForms import RegisterForm, LoginForm
 from docker_functions.docker_site_funcs import *
+
+#init database
+db.init_app(app)
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -159,7 +169,11 @@ def dashboard():
 
 @app.get("/test_create_route/")
 def test_create():
-	success = create_site()
+
+	user = User.query.get(int(1))
+	hostname = 'host1.dockertest.internal'
+
+	success = create_site(user, hostname)
 	return "test create"
 
 if __name__ == '__main__':
