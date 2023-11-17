@@ -61,6 +61,7 @@ def create_site(user, hostname):
         docker_id=container_id,
         volume_path=f"/{container_name}",
         image=container_image,
+        hostname = hostname,
         user=user
     )
     db.session.add(site)
