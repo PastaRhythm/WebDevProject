@@ -9,8 +9,54 @@ import os, sys
 scriptdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(scriptdir)
 
+import docker
+
+#traefik router class
+class TraefikApp(Flask):
+	def __init__(self, *args, **kwargs):
+		'''class that creates a traefik container when the app starts if it does not exist'''
+		super(TraefikApp, self).__init__(*args, **kwargs)
+
+		#check if the traefik container exists
+		client = docker.from_env()
+		traefik_container_name = "traefik-router"
+		try:
+			_ = client.containers.get(traefik_container_name)
+		except docker.errors.NotFound as e:
+			print("Creating traefik container!")
+			try:
+				_ = client.containers.run(
+					"traefik:latest",
+					name = traefik_container_name,
+					detach=True,
+					ports={'80/tcp': '80'},
+					command = [
+						"--api.insecure=true",
+						"--providers.docker=true",
+						"--providers.docker.exposedbydefault=false",
+						"--entrypoints.web.address=:80"
+					],
+					labels = {
+						'traefik.enable': 'True',
+						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
+						'traefik.http.routers.traefik.entrypoints': 'web',
+						'traefik.http.routers.traefik.service': 'api@internal'
+					},
+					volumes = {
+						"/var/run/docker.sock": {'bind': f"/var/run/docker.sock", 'mode': 'rw'}
+					}
+				)
+
+				print("Traefik container created!")
+			except docker.errors.APIError as e:
+				print(f"Error creating traefik container: {e}")
+				raise   #raise most recently caught exception
+		finally:
+			client.close()
+
+
 # configure this web application
-app = Flask(__name__)
+app = TraefikApp(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
 
