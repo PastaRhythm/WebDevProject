@@ -15,8 +15,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
 
 # Import from various files
-from database_manager import db
-from models.User import User
+from database_manager import db, User, Website
 from forms.loginForms import RegisterForm, LoginForm
 from docker_functions.docker_site_funcs import *
 
@@ -83,7 +82,8 @@ def handle_register():
 				password=form.password.data,
 				fname=form.fname.data,
 				lname=form.lname.data,
-				billing_address=form.billing_address.data
+				billing_address=form.billing_address.data,
+				status = 1
 			)
 			db.session.add(user)
 			db.session.commit()
