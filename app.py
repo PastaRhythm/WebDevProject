@@ -1,37 +1,79 @@
 from flask import Flask
 from flask import redirect, url_for, render_template
 from flask import request, session, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_required
+from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 
-from updated_hasher import UpdatedHasher
-from forms.loginForms import RegisterForm, LoginForm
-from models.User import User
+#database
+from flask_sqlalchemy import SQLAlchemy
 
-# identify the script directory to locate the database, pepper, and helper files
+# Add this directory to the Python path
 import os, sys
 scriptdir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(scriptdir)
 dbfile = os.path.join(scriptdir, "app.sqlite3")
-pepfile = os.path.join(scriptdir, "pepper.bin")
+sys.path.append(scriptdir)
 
-# Read the pepper and set up the password hasher
-with open(pepfile, 'rb') as fin:
-	pepper_key = fin.read()
-pwd_hasher = UpdatedHasher(pepper_key)
+import docker
 
-# load docker functions
-from docker_functions.docker_site_funcs import *
+from constants import TRAEFIK_CONTAINER_NAME
+
+#traefik router class
+class TraefikApp(Flask):
+	def __init__(self, *args, **kwargs):
+		'''class that creates a traefik container when the app starts if it does not exist'''
+		super(TraefikApp, self).__init__(*args, **kwargs)
+
+		#check if the traefik container exists
+		client = docker.from_env()
+		try:
+			_ = client.containers.get(TRAEFIK_CONTAINER_NAME)
+		except docker.errors.NotFound as e:
+			print("Creating traefik container!")
+			try:
+				_ = client.containers.run(
+					"traefik:latest",
+					name = TRAEFIK_CONTAINER_NAME,
+					detach=True,
+					ports={'80/tcp': '80'},
+					command = [
+						"--api.insecure=true",
+						"--providers.docker=true",
+						"--providers.docker.exposedbydefault=false",
+						"--entrypoints.web.address=:80"
+					],
+					labels = {
+						'traefik.enable': 'true',
+						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
+						'traefik.http.routers.traefik.entrypoints': 'web',
+						'traefik.http.routers.traefik.service': 'api@internal'
+					},
+					volumes = {
+						"/var/run/docker.sock": {'bind': f"/var/run/docker.sock", 'mode': 'rw'}
+					}
+				)
+
+				print("Traefik container created!")
+			except docker.errors.APIError as e:
+				print(f"Error creating traefik container: {e}")
+				raise   #raise most recently caught exception
+		finally:
+			client.close()
+
 
 # configure this web application
-app = Flask(__name__)
+app = TraefikApp(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+# Import from various files
+from database_manager import User, Website, db
+from forms.loginForms import RegisterForm, LoginForm
+from docker_functions.docker_site_funcs import *
+
+#init database
+db.init_app(app)
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -42,11 +84,6 @@ login_manager.login_view = 'login' # type: ignore
 @login_manager.user_loader
 def load_user(uid: int) -> User:
     return User.query.get(int(uid))
-
-# Leave this commented out if you don't want the database to be deleted.
-with app.app_context():
-	db.drop_all()
-	db.create_all()
 
 @app.route("/")
 def index():
@@ -101,7 +138,8 @@ def handle_register():
 				password=form.password.data,
 				fname=form.fname.data,
 				lname=form.lname.data,
-				billing_address=form.billing_address.data
+				billing_address=form.billing_address.data,
+				status = 1
 			)
 			db.session.add(user)
 			db.session.commit()
@@ -116,7 +154,7 @@ def handle_register():
 			flash(f"{field}: {error}")
 		return redirect(url_for('register'))
 
-@app.get("")
+@app.get("/logout/")
 @login_required
 def get_logout():
 	logout_user()
@@ -131,9 +169,12 @@ def dashboard():
 
 @app.get("/test_create_route/")
 def test_create():
-	success = create_site()
-	return "test create"
 
+	user = User.query.get(int(1))
+	hostname = 'host1.dockertest.internal'
+
+	success = create_site(user, hostname)
+	return "test create"
 
 if __name__ == '__main__':
 	app.run()

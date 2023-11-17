@@ -1,3 +1,4 @@
 /_env
 /volumes/*
 *cpython*
+*.sqlite3
