@@ -5,21 +5,77 @@ from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 import zipfile, shutil
 
+#database
+from flask_sqlalchemy import SQLAlchemy
+
 # Add this directory to the Python path
 import os, sys
 scriptdir = os.path.dirname(os.path.abspath(__file__))
+dbfile = os.path.join(scriptdir, "app.sqlite3")
 sys.path.append(scriptdir)
 
+import docker
+
+from constants import TRAEFIK_CONTAINER_NAME
+
+#traefik router class
+class TraefikApp(Flask):
+	def __init__(self, *args, **kwargs):
+		'''class that creates a traefik container when the app starts if it does not exist'''
+		super(TraefikApp, self).__init__(*args, **kwargs)
+
+		#check if the traefik container exists
+		client = docker.from_env()
+		try:
+			_ = client.containers.get(TRAEFIK_CONTAINER_NAME)
+		except docker.errors.NotFound as e:
+			print("Creating traefik container!")
+			try:
+				_ = client.containers.run(
+					"traefik:latest",
+					name = TRAEFIK_CONTAINER_NAME,
+					detach=True,
+					ports={'80/tcp': '80'},
+					command = [
+						"--api.insecure=true",
+						"--providers.docker=true",
+						"--providers.docker.exposedbydefault=false",
+						"--entrypoints.web.address=:80"
+					],
+					labels = {
+						'traefik.enable': 'true',
+						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
+						'traefik.http.routers.traefik.entrypoints': 'web',
+						'traefik.http.routers.traefik.service': 'api@internal'
+					},
+					volumes = {
+						"/var/run/docker.sock": {'bind': f"/var/run/docker.sock", 'mode': 'rw'}
+					}
+				)
+
+				print("Traefik container created!")
+			except docker.errors.APIError as e:
+				print(f"Error creating traefik container: {e}")
+				raise   #raise most recently caught exception
+		finally:
+			client.close()
+
+
 # configure this web application
-app = Flask(__name__)
+app = TraefikApp(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
-from database_manager import db, User, Website
+from database_manager import User, Website, db, seed_db
 from forms.loginForms import RegisterForm, LoginForm
 from forms.siteForms import NewSiteForm, UploadFilesForm
 from docker_functions.docker_site_funcs import *
+
+#init database
+db.init_app(app)
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -179,8 +235,13 @@ def handle_upload_files(site_id: int):
 
 @app.get("/test_create_route/")
 def test_create():
-	success = create_site()
+
+	user = User.query.get(int(1))
+	hostname = 'host1.dockertest.internal'
+
+	success = create_site(user, hostname)
 	return "test create"
 
 if __name__ == '__main__':
+	#seed_db(app)
 	app.run()

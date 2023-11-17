@@ -1,20 +1,15 @@
 from fileinput import filename
 import docker
 import os
+from database_manager import Website
 
-from flask import url_for
+from app import db
 
-def create_site(urls = []):
+def create_site(user, hostname):
+    '''takes a user, and creates a website for them'''
     #0) create a custom name for the container based on the user's id, and the number of containers they have running
-    #TODO: QUERY TO GET UID AND FNAME AND LNAME, and SITECOUNT
-    uid = 3
-    fname = "jacob"
-    lname = "graham"
-    site_count = 3
-
-    container_name = f"user_{uid}{fname[0]}{lname[0]}_site_{site_count + 1}"
-
-    #TODO: UPDATE USER SITE_COUNT AT THE END
+    container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{len(user.websites)}"
+    #TODO:^ using len(sites) will produce bugs once deletion is added.
 
     #1) create a volume for the container using its id.  For now, copy the custom index.html into it.
     host_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{container_name}"
@@ -43,27 +38,35 @@ def create_site(urls = []):
             name = container_name,
             detach=True,
             volumes = volume_config,
-            ports={'80/tcp': '80'})  #remove ports later
+            labels = {
+                'traefik.enable': 'true',
+                f'traefik.http.routers.{container_name}.rule': f'Host(`{hostname}`)',
+                f'traefik.http.routers.{container_name}.entrypoints': 'web',
+            },
+        )  #remove ports later
 
         #save vars needed later
-        id = image = container.attrs['Id']
-        image = container.attrs['Config']['Image']
+        container_id = image = container.attrs['Id']
+        container_image = container.attrs['Config']['Image']
 
     except docker.errors.APIError as e:
         print(f"Error with compose.create: {e}")
         raise   #raise most recently caught exception
     finally:
         client.close()
-        
-    
-
-	#3) add traefik tags to handle url routing
-
-	
 
 	#4) create a db model for the container, saving all data that would be necessary to rebuild it from scratch if necessary
-
-
+    site = Website(
+        name=container_name,
+        docker_id=container_id,
+        volume_path=f"/{container_name}",
+        image=container_image,
+        hostname = hostname,
+        user=user
+    )
+    db.session.add(site)
+    db.session.commit()
+    print("Site saved!")
     return True
 
 def delete_site():
