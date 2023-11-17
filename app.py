@@ -180,12 +180,12 @@ def new_site():
 @app.post("/new_site/")
 @login_required
 def handle_new_site():
-	form = UploadFilesForm()
+	form = NewSiteForm()
 	if form.validate():
-		success = create_site(current_user, form.host_name)
+		success = create_site(current_user, form.host_name.data)
 		if (success):
 			# TODO: Have some nicer confirmation after creation
-			return redirect(url_for('dashboard'))
+			return redirect(url_for('show_sites'))
 		else:
 			flash("Site could not be created")
 			return redirect(url_for('new_site'))
@@ -242,7 +242,7 @@ def show_sites():
 @app.get('/sites_data/')
 def sites_json():
 	#get current user
-	user = User.query.first()	#TODO: get the currently autheticated user
+	user = User.query.get(current_user.id)
 
 	#load all site models associated with that user
 	websites = user.websites
@@ -271,5 +271,5 @@ def test_create():
 	return "test create"
 
 if __name__ == '__main__':
-	#seed_db(app)
+	seed_db(app)
 	app.run()

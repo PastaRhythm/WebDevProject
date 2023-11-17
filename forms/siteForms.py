@@ -6,7 +6,7 @@ class NewSiteForm(FlaskForm):
     host_name = StringField("Host Name: ", validators=[InputRequired()])
     # pricing_plan = SelectField("Pricing Plan: ", coerce=int)
 
-    submit = SubmitField("Register")
+    submit = SubmitField("Create")
 
 class UploadFilesForm(FlaskForm):
     # This gives a file path
