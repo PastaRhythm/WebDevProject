@@ -141,7 +141,7 @@ def handle_register():
 				fname=form.fname.data,
 				lname=form.lname.data,
 				billing_address=form.billing_address.data,
-				status = 1
+				role = 1
 			)
 			db.session.add(user)
 			db.session.commit()

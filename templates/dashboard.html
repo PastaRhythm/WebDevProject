@@ -2,6 +2,13 @@
 
 {% block body %}
 
-dashboard
+<h1>Dashboard</h1>
+<a href="/logout/">Log out</a>
+<br>
+
+<h3>Your sites:</h3>
+{% for w in websites %}
+    <a href="/website/{{w.id}}/"> {{w.name}} </a>
+{% endfor %}
 
 {% endblock %}

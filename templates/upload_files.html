@@ -2,16 +2,15 @@
 
 {% block body %}
 
+<h1>New Website</h1>
+
 <form method="POST">
     {{form.hidden_tag()}}
 
-    {{form.email.label}}
-    {{form.email()}}
+    {{form.zip_file.label}}
+    {{form.zip_file()}}
     <br>
-    {{form.password.label}}
-    {{form.password()}}
-    <br>
-    
+
     {{form.submit()}}
 </form>
 

@@ -2,6 +2,21 @@
 
 {% block body %}
 
-homepage
+<h1>CSSuper</h1>
+<h2>Web hosting at a cheap price</h2>
+<p>(Satisfactory)</p>
+<br>
+
+{% if current_user.is_authenticated %}
+    <p>Welcome, {{current_user.fname}} {{current_user.lname}}</p>
+    <a href="/logout/">Log out</a>
+    <br>
+    <a href="/sites/">Go to Sites</a>
+{% else %}
+    <p>Login to see your websites, or register to get started!</p>
+    <a href="/login/">Login</a>
+    <br>
+    <a href="/register/">Register</a>
+{% endif %}
 
 {% endblock %}
