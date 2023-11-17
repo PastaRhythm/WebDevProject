@@ -38,36 +38,38 @@ class Website(db.Model):
     docker_id = db.Column(db.Unicode, nullable=False)
     volume_path = db.Column(db.Unicode, nullable=False)
     image = db.Column(db.Unicode, nullable=False)
+    hostname = db.Column(db.Unicode, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
 
-if __name__ == '__main__':
-    conf = input("Are you sure you want to recreate the database, DELETING ALL PREEXISTING DATA? (Y/n): ")
-    if conf == "Y":
-        with app.app_context():
-            # Recreate databases
-            db.drop_all()
-            db.create_all()
+# if __name__ == '__main__':
+#     conf = input("Are you sure you want to recreate the database, DELETING ALL PREEXISTING DATA? (Y/n): ")
+#     if conf == "Y":
+def seed_db(app):
+    with app.app_context():
+        # Recreate databases
+        db.drop_all()
+        db.create_all()
 
-            # Generate test data
-            user1 = User(fname="Billy", lname="Bob", password="testtest", email="billy.bob@gmail.com",
-                         billing_address = "Nowhere", role=1)
-            user2 = User(fname="Luke", lname="Skywalker", password="theforce", email="luke.skywalker@gmail.com",
-                         billing_address = "A galaxy far, far away", role=1)
-            site1 = Website(name="Billy's Farm", docker_id="32987310857", volume_path="/bb",
-                            image="httpd:2.4", user=user1)
-            site2 = Website(name="Luke's Handbags", docker_id="238479", volume_path="/ls_bag",
-                            image="httpd:2.4", user=user2)
-            site3 = Website(name="Luke's Therapy Sessions", docker_id="1010810108", volume_path="/ls_therapy",
-                            image="httpd:2.4", user=user2)
-            
-            users = [user1, user2]
-            sites = [site1, site2, site3]
+        # Generate test data
+        user1 = User(fname="Billy", lname="Bob", password="testtest", email="billy.bob@gmail.com",
+                        billing_address = "Nowhere", role=1)
+        user2 = User(fname="Luke", lname="Skywalker", password="theforce", email="luke.skywalker@gmail.com",
+                        billing_address = "A galaxy far, far away", role=1)
+        site1 = Website(name="Billy's Farm", docker_id="32987310857", volume_path="/bb",
+                        image="httpd:2.4", user=user1, hostname="io.io")
+        site2 = Website(name="Luke's Handbags", docker_id="238479", volume_path="/ls_bag",
+                        image="httpd:2.4", user=user2, hostname="org.org")
+        site3 = Website(name="Luke's Therapy Sessions", docker_id="1010810108", volume_path="/ls_therapy",
+                        image="httpd:2.4", user=user2, hostname="com.com")
+        
+        users = [user1, user2]
+        sites = [site1, site2, site3]
 
-            db.session.add_all(users)
-            db.session.add_all(sites)
+        db.session.add_all(users)
+        db.session.add_all(sites)
 
-            db.session.commit()
+        db.session.commit()
 
-        print("Generated new database.")
-    else:
-        print("Aborted.")
+    print("Generated new database.")
+# else:
+#     print("Aborted.")

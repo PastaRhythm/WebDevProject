@@ -68,7 +68,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
-from database_manager import User, Website, db
+from database_manager import User, Website, db, seed_db
 from forms.loginForms import RegisterForm, LoginForm
 from docker_functions.docker_site_funcs import *
 
@@ -177,4 +177,5 @@ def test_create():
 	return "test create"
 
 if __name__ == '__main__':
+	seed_db(app)
 	app.run()

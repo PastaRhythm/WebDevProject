@@ -9,7 +9,20 @@
     <title>Web App</title>
 </head>
 <body>
-    
+    <div class="flash_messages">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="alert alert-danger" role="alert">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No messages to display.</p>
+        {% endif %}
+    {% endwith %}
+    </div>
+
     {% block body %}
     {% endblock %}
 </body>

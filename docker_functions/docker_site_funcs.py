@@ -9,7 +9,7 @@ def create_site(user, hostname):
     '''takes a user, and creates a website for them'''
     #0) create a custom name for the container based on the user's id, and the number of containers they have running
     container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{len(user.websites)}"
-
+    #TODO:^ using len(sites) will produce bugs once deletion is added.
 
     #1) create a volume for the container using its id.  For now, copy the custom index.html into it.
     host_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{container_name}"
@@ -61,6 +61,7 @@ def create_site(user, hostname):
         docker_id=container_id,
         volume_path=f"/{container_name}",
         image=container_image,
+        hostname = hostname,
         user=user
     )
     db.session.add(site)
