@@ -16,7 +16,8 @@
                 <th>Site Name</th>
                 <th>Site ID</th>
                 <th>Image</th>
-                <th>Visit</th>
+                <th>Visit Site</th>
+                <th>File Upload</th>
             </tr>
         </thead>
         <tbody id="user_websites_tbody"></tbody>
@@ -67,6 +68,14 @@
             site_link.href = "http://" + website.hostname
             site_visit.append(site_link)
             tr.appendChild(site_visit)
+
+            //Add file upload link col
+            const site_upload = document.createElement('td')
+            const upload_link = document.createElement('a')
+            upload_link.innerText = "Upload"
+            upload_link.href = "/upload_files/" + website.id + "/"
+            site_upload.append(upload_link)
+            tr.appendChild(site_upload)
 
             //add tr to body
             user_websites_tbody.appendChild(tr)

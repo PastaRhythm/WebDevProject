@@ -2,9 +2,16 @@
 
 {% block body %}
 
-<h1>New Website</h1>
+<a href="/sites/">Cancel</a>
+<br>
 
-<form method="POST">
+<h1>Upload Files</h1>
+
+<p>You must upload a zip file with the files for your site.</p>
+
+<p>If the zip file has an index.html at root, this will automatically be shown when a user visits the site.</p>
+
+<form method="POST" enctype="multipart/form-data">
     {{form.hidden_tag()}}
 
     {{form.zip_file.label}}
@@ -13,5 +20,10 @@
 
     {{form.submit()}}
 </form>
+
+<!-- <form method="POST" action="" enctype="multipart/form-data">
+    <p><input type="file" name="file" accept=".zip"></p>
+    <p><input type="submit" value="Upload"></p>
+</form> -->
 
 {% endblock %}

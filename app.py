@@ -208,31 +208,55 @@ def upload_files(site_id: int):
 	site = Website.query.get(site_id)
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
+	# return render_template('upload_files.html')
 
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
 	form = UploadFilesForm()
 	if form.validate():
-		site: Website = Website.query.get(site_id)
 
+		# Get the file
+		f = form.zip_file.data
+
+		# Get the path of the volume
+		site: Website = Website.query.get(site_id)
 		vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
 
 		# Remove all files in the path
-		#TODO: TEST THIS IN AN ENVIRONMENT BEFORE USING!!!
-		# shutil.rmtree(vol_path)
-		# os.makedirs(vol_path)
+		shutil.rmtree(vol_path)
+		os.makedirs(vol_path)
 
-		# Get the file, unzip it, put the contents in the proper volume
-		with zipfile.ZipFile(form.zip_file.data, 'r') as zip_ref:
+		# Unzip the file and put the contents in the proper volume
+		with zipfile.ZipFile(f.stream, 'r') as zip_ref:
 			zip_ref.extractall(vol_path)
 
-		return redirect(url_for("view_site", site_id=site_id))
+		return redirect(url_for("show_sites"))
 	else: # if the form was invalid
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('upload_files'))
+		return redirect(url_for('upload_files', site_id=site_id))
+	
+	# # Get the file
+	# uploaded_file = request.files['file']
+	# if uploaded_file.filename == '':
+	# 	flash(f"You must upload a file.")
+	# 	return redirect(url_for('upload_files'))
+	
+	# # Get the path of the volume
+	# site: Website = Website.query.get(site_id)
+	# vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
+
+	# # Remove the files within the volume
+	# shutil.rmtree(vol_path)
+	# os.makedirs(vol_path)
+
+	# # Extract the contents of the zip file to the volume
+	# with zipfile.ZipFile(uploaded_file.stream, 'r') as zip_ref:
+	# 	zip_ref.extractall(vol_path)
+
+	
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
@@ -271,5 +295,5 @@ def test_create():
 	return "test create"
 
 if __name__ == '__main__':
-	seed_db(app)
+	#seed_db(app)
 	app.run()
