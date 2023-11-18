@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms.fields import SubmitField, StringField, SelectField, FileField
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms.fields import SubmitField, StringField, SelectField
 from wtforms.validators import InputRequired, Regexp
 
 class NewSiteForm(FlaskForm):
@@ -10,6 +11,6 @@ class NewSiteForm(FlaskForm):
 
 class UploadFilesForm(FlaskForm):
     # This gives a file path
-    zip_file = FileField('Zip File, preferably containing index.html at root', validators = [InputRequired()])
+    zip_file = FileField('Zip File, preferably containing index.html at root: ', validators = [FileRequired()])#, FileAllowed(['zip'], "zip files only")])
 
     submit = SubmitField("Set website files to selected")
