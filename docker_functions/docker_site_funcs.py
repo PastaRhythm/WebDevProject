@@ -6,7 +6,7 @@ from database_manager import Website
 from app import db
 
 def create_site(user, hostname):
-    '''takes a user, and creates a website for them'''
+    '''takes a user and a hostname, and creates a website for them with that hostname pointing to it'''
     #0) insert blank record, and create a custom name for the container based on the user's id and container's id
     site = Website(
         name="",
@@ -77,5 +77,29 @@ def create_site(user, hostname):
     print("Site saved!")
     return True
 
-def delete_site():
-    pass
+def delete_site(site):
+    '''takes an instance of a site model, and deletes it, its container, and its volume'''
+
+    #1) delete container associated with that model
+    client = docker.from_env()
+    try:
+        #get the site's container
+        container = client.containers.get(site.name)
+
+        #stop and remove the container
+        container.stop()
+        container.remove()
+
+    except docker.errors.APIError as e:
+        print(f"Error with compose.delete: {e}")
+        raise   #raise most recently caught exception
+    finally:
+        client.close()
+
+
+    #2) delete volume associated with the model
+    #TODO
+
+    #3) delete the model record from the db
+    db.session.delete(container)
+    db.session.commit()
