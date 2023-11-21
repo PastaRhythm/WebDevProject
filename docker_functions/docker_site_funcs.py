@@ -101,5 +101,5 @@ def delete_site(site):
     #TODO
 
     #3) delete the model record from the db
-    db.session.delete(container)
+    db.session.delete(site)
     db.session.commit()
