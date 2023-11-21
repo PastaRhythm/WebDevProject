@@ -7,9 +7,20 @@ from app import db
 
 def create_site(user, hostname):
     '''takes a user, and creates a website for them'''
-    #0) create a custom name for the container based on the user's id, and the number of containers they have running
-    container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{len(user.websites)}"
-    #TODO:^ using len(sites) will produce bugs once deletion is added.
+    #0) insert blank record, and create a custom name for the container based on the user's id and container's id
+    site = Website(
+        name="",
+        docker_id="",
+        volume_path="",
+        image="",
+        hostname = hostname,
+        user=user
+    )
+    db.session.add(site)
+    db.session.commit()
+    container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{site.id}"
+
+
 
     #1) create a volume for the container using its id.  For now, copy the custom index.html into it.
     host_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{container_name}"
@@ -21,7 +32,7 @@ def create_site(user, hostname):
 
     #create index file
     with open(f"{host_path}/index.html", 'w') as file:
-        file.write(f'Index file for {container_name}')
+        file.write(f'<h3>Index file for {container_name}</h3>')
 
     volume_config = {
         host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
@@ -46,7 +57,7 @@ def create_site(user, hostname):
         )  #remove ports later
 
         #save vars needed later
-        container_id = image = container.attrs['Id']
+        container_id = container.attrs['Id']
         container_image = container.attrs['Config']['Image']
 
     except docker.errors.APIError as e:
@@ -55,15 +66,12 @@ def create_site(user, hostname):
     finally:
         client.close()
 
-	#4) create a db model for the container, saving all data that would be necessary to rebuild it from scratch if necessary
-    site = Website(
-        name=container_name,
-        docker_id=container_id,
-        volume_path=f"/{container_name}",
-        image=container_image,
-        hostname = hostname,
-        user=user
-    )
+	#4) update db model with container info, saving all data that would be necessary to rebuild it from scratch if necessary
+    #site = session.query(YourModel).get(1)
+    site.name = container_name
+    site.docker_id = container_id
+    site.image = container_image
+    site.volume_path = f"/{container_name}"
     db.session.add(site)
     db.session.commit()
     print("Site saved!")
