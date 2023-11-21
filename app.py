@@ -1,3 +1,4 @@
+from distutils.log import log
 import string
 from flask import Flask
 from flask import redirect, url_for, render_template
@@ -204,6 +205,16 @@ def handle_new_site():
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
 		return redirect(url_for('new_site'))
+
+@app.post("/delete_site/<int:site_id>/")
+@login_required
+def handle_del_site(site_id: int):
+	#TODO: ensure correct user is deleting this site!
+	site = Website.query.get(site_id)
+	delete_site(site)
+
+	return f"Delete site: {site_id}"
+
 
 
 @app.get("/website/<int:site_id>/")
