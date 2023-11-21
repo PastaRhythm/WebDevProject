@@ -29,7 +29,17 @@ class TraefikApp(Flask):
 		#check if the traefik container exists
 		client = docker.from_env()
 		try:
-			_ = client.containers.get(TRAEFIK_CONTAINER_NAME)
+			#get the traefik container
+			traefik = client.containers.get(TRAEFIK_CONTAINER_NAME)
+
+			#check if the container is stopped
+			if traefik.status == "exited":
+				# Start the container
+				traefik.start()
+
+				print(f"Container {traefik.name} started successfully.")
+			else:
+				print(f"Container {traefik.name} is not stopped.")
 		except docker.errors.NotFound as e:
 			print("Creating traefik container!")
 			try:
