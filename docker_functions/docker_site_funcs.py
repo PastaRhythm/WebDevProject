@@ -1,15 +1,27 @@
 from fileinput import filename
 import docker
 import os
+import shutil
 from database_manager import Website
 
 from app import db
 
 def create_site(user, hostname):
-    '''takes a user, and creates a website for them'''
-    #0) create a custom name for the container based on the user's id, and the number of containers they have running
-    container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{len(user.websites)}"
-    #TODO:^ using len(sites) will produce bugs once deletion is added.
+    '''takes a user and a hostname, and creates a website for them with that hostname pointing to it'''
+    #0) insert blank record, and create a custom name for the container based on the user's id and container's id
+    site = Website(
+        name="",
+        docker_id="",
+        volume_path="",
+        image="",
+        hostname = hostname,
+        user=user
+    )
+    db.session.add(site)
+    db.session.commit()
+    container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{site.id}"
+
+
 
     #1) create a volume for the container using its id.  For now, copy the custom index.html into it.
     host_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{container_name}"
@@ -21,7 +33,7 @@ def create_site(user, hostname):
 
     #create index file
     with open(f"{host_path}/index.html", 'w') as file:
-        file.write(f'Index file for {container_name}')
+        file.write(f'<h3>Index file for {container_name}</h3>')
 
     volume_config = {
         host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
@@ -46,7 +58,7 @@ def create_site(user, hostname):
         )  #remove ports later
 
         #save vars needed later
-        container_id = image = container.attrs['Id']
+        container_id = container.attrs['Id']
         container_image = container.attrs['Config']['Image']
 
     except docker.errors.APIError as e:
@@ -55,19 +67,51 @@ def create_site(user, hostname):
     finally:
         client.close()
 
-	#4) create a db model for the container, saving all data that would be necessary to rebuild it from scratch if necessary
-    site = Website(
-        name=container_name,
-        docker_id=container_id,
-        volume_path=f"/{container_name}",
-        image=container_image,
-        hostname = hostname,
-        user=user
-    )
+	#4) update db model with container info, saving all data that would be necessary to rebuild it from scratch if necessary
+    #site = session.query(YourModel).get(1)
+    site.name = container_name
+    site.docker_id = container_id
+    site.image = container_image
+    site.volume_path = f"/{container_name}"
     db.session.add(site)
     db.session.commit()
     print("Site saved!")
     return True
 
-def delete_site():
-    pass
+def delete_site(site):
+    '''takes an instance of a site model, and deletes it, its container, and its volume'''
+
+    #1) delete container associated with that model
+    client = docker.from_env()
+    try:
+        #get the site's container
+        container = client.containers.get(site.name)
+
+        #stop and remove the container
+        container.stop()
+        container.remove()
+
+    except docker.errors.APIError as e:
+        print(f"Error with compose.delete: {e}")
+        raise   #raise most recently caught exception
+    finally:
+        client.close()
+
+
+    #2) delete volume associated with the model
+    try:
+        #path to the volume to delete
+        directory_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{site.name}"
+
+        #use shutil.rmtree to remove the directory and its contents
+        shutil.rmtree(directory_path)
+
+        print('Container volume removed successfully')
+
+    except Exception as e:
+        print(f'Error removing volume: {str(e)}')
+        raise
+
+    #3) delete the model record from the db
+    db.session.delete(site)
+    db.session.commit()

@@ -18,6 +18,7 @@
                 <th>Image</th>
                 <th>Visit Site</th>
                 <th>File Upload</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody id="user_websites_tbody"></tbody>
@@ -31,8 +32,12 @@
 
 
     async function fetch_user_sites(){
+        const user_websites_tbody = document.getElementById('user_websites_tbody')
         const endpoint = `{{ url_for('sites_json') }}`
         console.log(endpoint)
+
+        //add loader
+        user_websites_tbody.appendChild(create_loader())
 
         //get data
         const response = await fetch(endpoint)
@@ -40,8 +45,10 @@
         console.log(websites)
         console.log("done")
 
-        //insert data into list
-        const user_websites_tbody = document.getElementById('user_websites_tbody')
+        //clear current children, and add loader
+        user_websites_tbody.innerHTML = ""  //clear all children
+
+        //insert data into table
         websites.map((website)=>{
             //create row
             const tr = document.createElement('tr')
@@ -77,9 +84,51 @@
             site_upload.append(upload_link)
             tr.appendChild(site_upload)
 
+            //add the delete button
+            const del_btn = document.createElement('button')
+            del_btn.addEventListener('click', (event)=>{
+                delete_site(website.id)
+            })
+            const icon = document.createElement('i')
+            icon.classList.add('fa-solid')
+            icon.classList.add('fa-trash')
+            del_btn.appendChild(icon)
+            tr.appendChild(del_btn)
+
             //add tr to body
             user_websites_tbody.appendChild(tr)
         })
+    }
+
+    async function delete_site(id){
+        console.log('deleting site!')
+
+        //create and add loader
+        const user_websites_tbody = document.getElementById('user_websites_tbody')
+        user_websites_tbody.innerHTML = ""
+        user_websites_tbody.appendChild(create_loader())
+
+        //delete record and get results
+        fetch("/delete_site/" + id + '/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            //body: JSON.stringify(dataToSend),
+          })
+            .then(response => {
+              //check if the request was successful (status code 2xx)
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              //if the response is ok, refresh the table
+              console.log('refreshing table')
+              fetch_user_sites()
+            })
+            .catch(error => {
+              //handle errors during the fetch
+              console.error('Fetch error:', error);
+            });
     }
 </script>
 

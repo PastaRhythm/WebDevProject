@@ -1,3 +1,4 @@
+from distutils.log import log
 import string
 from flask import Flask
 from flask import redirect, url_for, render_template
@@ -29,7 +30,17 @@ class TraefikApp(Flask):
 		#check if the traefik container exists
 		client = docker.from_env()
 		try:
-			_ = client.containers.get(TRAEFIK_CONTAINER_NAME)
+			#get the traefik container
+			traefik = client.containers.get(TRAEFIK_CONTAINER_NAME)
+
+			#check if the container is stopped
+			if traefik.status == "exited":
+				# Start the container
+				traefik.start()
+
+				print(f"Container {traefik.name} started successfully.")
+			else:
+				print(f"Container {traefik.name} is not stopped.")
 		except docker.errors.NotFound as e:
 			print("Creating traefik container!")
 			try:
@@ -195,6 +206,16 @@ def handle_new_site():
 			flash(f"{field}: {error}")
 		return redirect(url_for('new_site'))
 
+@app.post("/delete_site/<int:site_id>/")
+@login_required
+def handle_del_site(site_id: int):
+	#TODO: ensure correct user is deleting this site!
+	site = Website.query.get(site_id)
+	delete_site(site)
+
+	return f"Delete site: {site_id}"
+
+
 
 @app.get("/website/<int:site_id>/")
 @login_required
@@ -202,7 +223,7 @@ def view_site(site_id: int):
 	site = Website.query.get(site_id)
 	return render_template("site_view.html", site=site)
 
-@app.get("/upload_files/<int:site_id>/")
+@app.get("/upload-files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
 	site = Website.query.get(site_id)
@@ -283,16 +304,6 @@ def sites_json():
 
 	#return the json string
 	return json_data
-	
-
-@app.get("/test_create_route/")
-def test_create():
-
-	user = User.query.get(int(1))	#TODO: get the currently autheticated user
-	hostname = 'host1.dockertest.internal'
-
-	success = create_site(user, hostname)
-	return "test create"
 
 if __name__ == '__main__':
 	#seed_db(app)
