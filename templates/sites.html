@@ -32,8 +32,12 @@
 
 
     async function fetch_user_sites(){
+        const user_websites_tbody = document.getElementById('user_websites_tbody')
         const endpoint = `{{ url_for('sites_json') }}`
         console.log(endpoint)
+
+        //add loader
+        user_websites_tbody.appendChild(create_loader())
 
         //get data
         const response = await fetch(endpoint)
@@ -41,8 +45,7 @@
         console.log(websites)
         console.log("done")
 
-        //clear current children
-        const user_websites_tbody = document.getElementById('user_websites_tbody')
+        //clear current children, and add loader
         user_websites_tbody.innerHTML = ""  //clear all children
 
         //insert data into table
@@ -99,6 +102,13 @@
 
     async function delete_site(id){
         console.log('deleting site!')
+
+        //create and add loader
+        const user_websites_tbody = document.getElementById('user_websites_tbody')
+        user_websites_tbody.innerHTML = ""
+        user_websites_tbody.appendChild(create_loader())
+
+        //delete record and get results
         fetch("/delete_site/" + id + '/', {
             method: 'POST',
             headers: {
