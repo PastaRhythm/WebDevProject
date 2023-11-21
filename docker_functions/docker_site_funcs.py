@@ -1,6 +1,7 @@
 from fileinput import filename
 import docker
 import os
+import shutil
 from database_manager import Website
 
 from app import db
@@ -98,7 +99,18 @@ def delete_site(site):
 
 
     #2) delete volume associated with the model
-    #TODO
+    try:
+        #path to the volume to delete
+        directory_path = f"{os.path.dirname(os.path.abspath(__file__))}/../volumes/{site.name}"
+
+        #use shutil.rmtree to remove the directory and its contents
+        shutil.rmtree(directory_path)
+
+        print('Container volume removed successfully')
+
+    except Exception as e:
+        print(f'Error removing volume: {str(e)}')
+        raise
 
     #3) delete the model record from the db
     db.session.delete(site)
