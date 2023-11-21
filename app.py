@@ -212,7 +212,7 @@ def view_site(site_id: int):
 	site = Website.query.get(site_id)
 	return render_template("site_view.html", site=site)
 
-@app.get("/upload_files/<int:site_id>/")
+@app.get("/upload-files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
 	site = Website.query.get(site_id)
@@ -293,16 +293,6 @@ def sites_json():
 
 	#return the json string
 	return json_data
-	
-
-@app.get("/test_create_route/")
-def test_create():
-
-	user = User.query.get(int(1))	#TODO: get the currently autheticated user
-	hostname = 'host1.dockertest.internal'
-
-	success = create_site(user, hostname)
-	return "test create"
 
 if __name__ == '__main__':
 	#seed_db(app)
