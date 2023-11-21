@@ -11,3 +11,11 @@ function validateJSON(response) {
         return Promise.reject(response);
     }
 }
+
+function create_loader(){
+    const loader = document.createElement('i')
+    loader.classList.add('fa-solid')
+    loader.classList.add('fa-gear')
+    loader.classList.add('fa-spin')
+    return loader
+}
