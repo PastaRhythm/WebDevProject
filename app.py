@@ -240,6 +240,7 @@ def upload_files(site_id: int):
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
+	# Make sure the user owns this site
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
 		flash("You do not have permission to modify this website.")
@@ -251,17 +252,47 @@ def handle_upload_files(site_id: int):
 		# Get the file
 		f = form.zip_file.data
 
-		# Get the path of the volume
-		site: Website = Website.query.get(site_id)
+		# Get the paths
 		vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
+		unzip_path = f"{os.path.dirname(os.path.abspath(__file__))}/unzip/{site.volume_path}"
 
-		# Remove all files in the path
+		# Attempt to unzip
+		os.makedirs(unzip_path, exist_ok=True)
+		try:
+			with zipfile.ZipFile(f.stream, 'r') as zip_ref:
+				zip_ref.extractall(unzip_path)
+		except Exception as e:
+			shutil.rmtree(unzip_path)
+			flash("Failed to unzip file. Are you sure you uploaded a zip file?")
+			print(f" -------- Couldn't unzip: {e}")
+			return redirect(url_for("upload_files", site_id=site_id))
+
+		# Replace the files in the volume with the unzipped files
 		shutil.rmtree(vol_path)
-		os.makedirs(vol_path)
+		shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
+		
+		# Remove all files in volume
+		# for filename in os.listdir(vol_path):
+		# 	file_path = os.path.join(vol_path, filename)
+		# 	try:
+		# 		if os.path.isfile(file_path) or os.path.islink(file_path):
+		# 			os.unlink(file_path)
+		# 		elif os.path.isdir(file_path):
+		# 			shutil.rmtree(file_path)
+		# 	except Exception as e:
+		# 		print(f" -------- Could not delete {file_path}\n -------- {e}\n -------- Trying a different option...")
+		# 		# Try deleting and recreating the volume directory
+		# 		try:
+		# 			shutil.rmtree(vol_path)
+		# 			os.makedirs(vol_path, exist_ok=True)
+		# 		except Exception as e:
+		# 			print(f" -------- Could not delete volume\n -------- {e}")
+		# 			flash("CRITICAL ERROR: COULD NOT DELETE ORIGINAL FILES")
+		# 			return redirect(url_for("upload_files"))
 
-		# Unzip the file and put the contents in the proper volume
-		with zipfile.ZipFile(f.stream, 'r') as zip_ref:
-			zip_ref.extractall(vol_path)
+		# Move all unzipped files to volume
+		# shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
+		# shutil.rmtree(unzip_path)
 
 		return redirect(url_for("show_sites"))
 	else: # if the form was invalid
