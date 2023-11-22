@@ -270,29 +270,6 @@ def handle_upload_files(site_id: int):
 		# Replace the files in the volume with the unzipped files
 		shutil.rmtree(vol_path)
 		shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
-		
-		# Remove all files in volume
-		# for filename in os.listdir(vol_path):
-		# 	file_path = os.path.join(vol_path, filename)
-		# 	try:
-		# 		if os.path.isfile(file_path) or os.path.islink(file_path):
-		# 			os.unlink(file_path)
-		# 		elif os.path.isdir(file_path):
-		# 			shutil.rmtree(file_path)
-		# 	except Exception as e:
-		# 		print(f" -------- Could not delete {file_path}\n -------- {e}\n -------- Trying a different option...")
-		# 		# Try deleting and recreating the volume directory
-		# 		try:
-		# 			shutil.rmtree(vol_path)
-		# 			os.makedirs(vol_path, exist_ok=True)
-		# 		except Exception as e:
-		# 			print(f" -------- Could not delete volume\n -------- {e}")
-		# 			flash("CRITICAL ERROR: COULD NOT DELETE ORIGINAL FILES")
-		# 			return redirect(url_for("upload_files"))
-
-		# Move all unzipped files to volume
-		# shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
-		# shutil.rmtree(unzip_path)
 
 		return redirect(url_for("show_sites"))
 	else: # if the form was invalid
