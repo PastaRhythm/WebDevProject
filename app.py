@@ -209,8 +209,11 @@ def handle_new_site():
 @app.post("/delete_site/<int:site_id>/")
 @login_required
 def handle_del_site(site_id: int):
-	#TODO: ensure correct user is deleting this site!
 	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+	
 	delete_site(site)
 
 	return f"Delete site: {site_id}"
@@ -223,17 +226,25 @@ def view_site(site_id: int):
 	site = Website.query.get(site_id)
 	return render_template("site_view.html", site=site)
 
-@app.get("/upload-files/<int:site_id>/")
+@app.get("/upload_files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
 	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
-	# return render_template('upload_files.html')
 
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+
 	form = UploadFilesForm()
 	if form.validate():
 
@@ -258,24 +269,6 @@ def handle_upload_files(site_id: int):
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
 		return redirect(url_for('upload_files', site_id=site_id))
-	
-	# # Get the file
-	# uploaded_file = request.files['file']
-	# if uploaded_file.filename == '':
-	# 	flash(f"You must upload a file.")
-	# 	return redirect(url_for('upload_files'))
-	
-	# # Get the path of the volume
-	# site: Website = Website.query.get(site_id)
-	# vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
-
-	# # Remove the files within the volume
-	# shutil.rmtree(vol_path)
-	# os.makedirs(vol_path)
-
-	# # Extract the contents of the zip file to the volume
-	# with zipfile.ZipFile(uploaded_file.stream, 'r') as zip_ref:
-	# 	zip_ref.extractall(vol_path)
 
 	
 
