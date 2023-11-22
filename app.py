@@ -209,8 +209,11 @@ def handle_new_site():
 @app.post("/delete_site/<int:site_id>/")
 @login_required
 def handle_del_site(site_id: int):
-	#TODO: ensure correct user is deleting this site!
 	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+	
 	delete_site(site)
 
 	return f"Delete site: {site_id}"
@@ -223,34 +226,50 @@ def view_site(site_id: int):
 	site = Website.query.get(site_id)
 	return render_template("site_view.html", site=site)
 
-@app.get("/upload-files/<int:site_id>/")
+@app.get("/upload_files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
 	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
-	# return render_template('upload_files.html')
 
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
+	# Make sure the user owns this site
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("show_sites"))
+
 	form = UploadFilesForm()
 	if form.validate():
 
 		# Get the file
 		f = form.zip_file.data
 
-		# Get the path of the volume
-		site: Website = Website.query.get(site_id)
+		# Get the paths
 		vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
+		unzip_path = f"{os.path.dirname(os.path.abspath(__file__))}/unzip/{site.volume_path}"
 
-		# Remove all files in the path
+		# Attempt to unzip
+		os.makedirs(unzip_path, exist_ok=True)
+		try:
+			with zipfile.ZipFile(f.stream, 'r') as zip_ref:
+				zip_ref.extractall(unzip_path)
+		except Exception as e:
+			shutil.rmtree(unzip_path)
+			flash("Failed to unzip file. Are you sure you uploaded a zip file?")
+			print(f" -------- Couldn't unzip: {e}")
+			return redirect(url_for("upload_files", site_id=site_id))
+
+		# Replace the files in the volume with the unzipped files
 		shutil.rmtree(vol_path)
-		os.makedirs(vol_path)
-
-		# Unzip the file and put the contents in the proper volume
-		with zipfile.ZipFile(f.stream, 'r') as zip_ref:
-			zip_ref.extractall(vol_path)
+		shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
 
 		return redirect(url_for("show_sites"))
 	else: # if the form was invalid
@@ -258,24 +277,6 @@ def handle_upload_files(site_id: int):
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
 		return redirect(url_for('upload_files', site_id=site_id))
-	
-	# # Get the file
-	# uploaded_file = request.files['file']
-	# if uploaded_file.filename == '':
-	# 	flash(f"You must upload a file.")
-	# 	return redirect(url_for('upload_files'))
-	
-	# # Get the path of the volume
-	# site: Website = Website.query.get(site_id)
-	# vol_path = f"{os.path.dirname(os.path.abspath(__file__))}/volumes/{site.volume_path}"
-
-	# # Remove the files within the volume
-	# shutil.rmtree(vol_path)
-	# os.makedirs(vol_path)
-
-	# # Extract the contents of the zip file to the volume
-	# with zipfile.ZipFile(uploaded_file.stream, 'r') as zip_ref:
-	# 	zip_ref.extractall(vol_path)
 
 	
 
