@@ -218,7 +218,7 @@ def handle_del_site(site_id: int):
 
 	return f"Delete site: {site_id}"
 
-@app.post("/unshare_site/<int:site_id>/<int:shared_user>")
+@app.post("/unshare_site/<int:site_id>/<int:shared_user>/")
 @login_required
 def handle_unshare_site(site_id: int, shared_user: int):
 	site = Website.query.get(site_id)

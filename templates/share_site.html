@@ -83,9 +83,9 @@
 
             //add the delete button
             const del_btn = document.createElement('button')
-            // del_btn.addEventListener('click', (event)=>{
-            //     delete_site(website.id)
-            // })
+            del_btn.addEventListener('click', (event)=>{
+                unshare(site_id, user.id)
+            })
             const icon = document.createElement('i')
             icon.classList.add('fa-solid')
             icon.classList.add('fa-trash')
@@ -95,6 +95,37 @@
             //add tr to body
             shared_body.appendChild(tr)
         })
+    }
+
+    async function unshare(site_id, user_id) {
+        console.log('Unsharing site')
+
+        //create and add loader
+        const shared_body = document.getElementById('shared_body')
+        shared_body.innerHTML = ""
+        shared_body.appendChild(create_loader())
+
+        //delete record and get results
+        fetch(`/unshare_site/${site_id}/${user_id}/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            //body: JSON.stringify(dataToSend),
+        })
+            .then(response => {
+                //check if the request was successful (status code 2xx)
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                //if the response is ok, refresh the table
+                console.log('refreshing table')
+                fill_shared()
+            })
+            .catch(error => {
+                //handle errors during the fetch
+                console.error('Fetch error:', error);
+            });
     }
 </script>
 
