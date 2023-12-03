@@ -218,6 +218,22 @@ def handle_del_site(site_id: int):
 
 	return f"Delete site: {site_id}"
 
+@app.post("/unshare_site/<int:site_id>/<int:shared_user>")
+@login_required
+def handle_unshare_site(site_id: int, shared_user: int):
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to unshare this website.")
+		return redirect(url_for("show_sites"))
+	
+	link = PermissionLink.query.get({"site_id":site_id, "user_id":shared_user})
+
+	if link is None:
+		return f"No link between user {shared_user} and site {site_id}"
+
+	unshare_site(link)
+
+	return f"Delete site: {site_id}"
 
 
 @app.get("/website/<int:site_id>/")
@@ -374,6 +390,29 @@ def shared_sites_json():
 			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}"
 		}
 		for website in websites
+	])
+
+	#return the json string
+	return json_data
+
+@app.get('/shared_users_data/<int:site_id>/')
+def shared_users_json(site_id: int):
+	# Get the site
+	site = Website.query.get(site_id)
+
+	# Load all users that the site is shared with
+	shared = site.shared_with
+	users = []
+	for s in shared:
+		users.append(s.user)
+
+	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': user.id, 'email': user.email,
+			'name': f"{user.fname} {user.lname}"
+		}
+		for user in users
 	])
 
 	#return the json string

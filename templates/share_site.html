@@ -28,6 +28,7 @@
 <table>
     <thead>
         <th>ID</th>
+        <th>Name</th>
         <th>Email</th>
         <th>Unshare</th>
     </thead>
@@ -39,65 +40,48 @@
         fill_shared();
     })
 
-    //TODO: Not done
     async function fill_shared(){
-        const user_websites_tbody = document.getElementById('shared_body')
+        const shared_body = document.getElementById('shared_body')
         const endpoint = `{{ url_for('shared_users_json') }}`
         console.log(endpoint)
 
         //add loader
-        user_websites_tbody.appendChild(create_loader())
+        shared_body.appendChild(create_loader())
 
         //get data
         const response = await fetch(endpoint)
-        const websites = await validateJSON(response)
-        console.log(websites)
+        const users = await validateJSON(response)
+        console.log(users)
         console.log("done")
 
         //clear current children, and add loader
-        user_websites_tbody.innerHTML = ""  //clear all children
+        shared_body.innerHTML = ""  //clear all children
 
         //insert data into table
-        websites.map((website)=>{
+        users.map((user)=>{
             //create row
             const tr = document.createElement('tr')
             
-            //add site name col
-            const site_name = document.createElement('td')
-            site_name.innerText = website.name
-            tr.appendChild(site_name)
+            //add ID col
+            const user_id = document.createElement('td')
+            user.innerText = user.id
+            tr.appendChild(user_id)
 
-            //add site id col
-            const site_id = document.createElement('td')
-            site_id.innerText = website.id
-            tr.appendChild(site_id)
+            //add name col
+            const user_name = document.createElement('td')
+            user_name.innerText = user.name
+            tr.appendChild(user_name)
 
-            //add image col
-            const site_image = document.createElement('td')
-            site_image.innerText = website.image
-            tr.appendChild(site_image)
-
-            //add visit link col
-            const site_visit = document.createElement('td')
-            const site_link = document.createElement('a')
-            site_link.innerText = "Visit"
-            site_link.href = "http://" + website.hostname
-            site_visit.append(site_link)
-            tr.appendChild(site_visit)
-
-            //Add file upload link col
-            const site_upload = document.createElement('td')
-            const upload_link = document.createElement('a')
-            upload_link.innerText = "Upload"
-            upload_link.href = "/upload_files/" + website.id + "/"
-            site_upload.append(upload_link)
-            tr.appendChild(site_upload)
+            //add email col
+            const user_email = document.createElement('td')
+            user_email.innerText = user.email
+            tr.appendChild(user_email)
 
             //add the delete button
             const del_btn = document.createElement('button')
-            del_btn.addEventListener('click', (event)=>{
-                delete_site(website.id)
-            })
+            // del_btn.addEventListener('click', (event)=>{
+            //     delete_site(website.id)
+            // })
             const icon = document.createElement('i')
             icon.classList.add('fa-solid')
             icon.classList.add('fa-trash')
