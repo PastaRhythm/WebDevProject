@@ -245,10 +245,20 @@ def view_site(site_id: int):
 @app.get("/upload_files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
+	# Check Permission
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
-		flash("You do not have permission to modify this website.")
-		return redirect(url_for("show_sites"))
+		# Check if this site has been shared with the current user.
+		found = False
+		links = site.shared_with
+		for l in links:
+			if l.user_id == current_user.id:
+				found = True
+				break
+
+		if not found:
+			flash("You do not have permission to modify this website.")
+			return redirect(url_for("show_sites"))
 
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
@@ -256,11 +266,20 @@ def upload_files(site_id: int):
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
-	# Make sure the user owns this site
+	# Check Permission
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
-		flash("You do not have permission to modify this website.")
-		return redirect(url_for("show_sites"))
+		# Check if this site has been shared with the current user.
+		found = False
+		links = site.shared_with
+		for l in links:
+			if l.user_id == current_user.id:
+				found = True
+				break
+
+		if not found:
+			flash("You do not have permission to modify this website.")
+			return redirect(url_for("show_sites"))
 
 	form = UploadFilesForm()
 	if form.validate():
@@ -304,7 +323,7 @@ def share_site_route(site_id: int):
 
 	form = ShareSiteForm()
 	current_shares = site.shared_with
-	return render_template('share_site.html', form=form, current_shares=current_shares)
+	return render_template('share_site.html', form=form, current_shares=current_shares, site_id=site_id)
 
 @app.post("/share_site/<int:site_id>/")
 @login_required

@@ -24,7 +24,9 @@
     {{form.submit()}}
 </form>
 
-<h2>Currently Shared With</h2>
+<input id="siteID" type="hidden" value="{{site_id}}">
+
+<h2>Currently Sharing With</h2>
 <table>
     <thead>
         <th>ID</th>
@@ -41,8 +43,10 @@
     })
 
     async function fill_shared(){
+        const site_id = document.getElementById('siteID').value
+
         const shared_body = document.getElementById('shared_body')
-        const endpoint = `{{ url_for('shared_users_json') }}`
+        const endpoint = `/shared_users_data/${site_id}/`
         console.log(endpoint)
 
         //add loader
@@ -64,7 +68,7 @@
             
             //add ID col
             const user_id = document.createElement('td')
-            user.innerText = user.id
+            user_id.innerText = user.id
             tr.appendChild(user_id)
 
             //add name col
@@ -89,7 +93,7 @@
             tr.appendChild(del_btn)
 
             //add tr to body
-            user_websites_tbody.appendChild(tr)
+            shared_body.appendChild(tr)
         })
     }
 </script>
