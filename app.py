@@ -306,6 +306,30 @@ def sites_json():
 	#return the json string
 	return json_data
 
+@app.get('/shared_sites_data/')
+def shared_sites_json():
+	#get current user
+	user = User.query.get(current_user.id)
+
+	#load all sites shared with the user
+	shared = user.shared_with_me
+	websites = []
+	for s in shared:
+		websites.append(s.site)
+
+	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
+			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
+			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}"
+		}
+		for website in websites
+	])
+
+	#return the json string
+	return json_data
+
 if __name__ == '__main__':
 	#seed_db(app)
 	app.run()
