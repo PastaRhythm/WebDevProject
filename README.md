@@ -12,11 +12,9 @@ To run and test this app effectively, a few things need to be done:
     Navigate to the following file: C:\Windows\System32\drivers\etc\hosts
     And paste this text at the bottom:
 
-    # Docker Hosts #
     127.0.0.1 host1.dockertest.internal
     127.0.0.1 host2.dockertest.internal
     127.0.0.1 host3.dockertest.internal
-    # Docker End #
 
     Then save.  Test adding sites using the 3 domains above (host1.dockertest.internal, etc.)
 
