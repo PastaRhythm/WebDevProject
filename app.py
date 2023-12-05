@@ -129,7 +129,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Import from various files
 #from database_manager import User, Website, db, seed_db
 from forms.loginForms import RegisterForm, LoginForm
-from forms.siteForms import NewSiteForm, UploadFilesForm
+from forms.siteForms import NewSiteForm, UploadFilesForm, ShareSiteForm
 from docker_functions.docker_site_funcs import *
 
 #init database
@@ -264,6 +264,22 @@ def handle_del_site(site_id: int):
 
 	return f"Delete site: {site_id}"
 
+@app.post("/unshare_site/<int:site_id>/<int:shared_user>/")
+@login_required
+def handle_unshare_site(site_id: int, shared_user: int):
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to unshare this website.")
+		return redirect(url_for("show_sites"))
+	
+	link = PermissionLink.query.get({"site_id":site_id, "user_id":shared_user})
+
+	if link is None:
+		return f"No link between user {shared_user} and site {site_id}"
+
+	unshare_site(link)
+
+	return f"Delete site: {site_id}"
 
 
 @app.get("/website/<int:site_id>/")
@@ -275,10 +291,20 @@ def view_site(site_id: int):
 @app.get("/upload_files/<int:site_id>/")
 @login_required
 def upload_files(site_id: int):
+	# Check Permission
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
-		flash("You do not have permission to modify this website.")
-		return redirect(url_for("show_sites"))
+		# Check if this site has been shared with the current user.
+		found = False
+		links = site.shared_with
+		for l in links:
+			if l.user_id == current_user.id:
+				found = True
+				break
+
+		if not found:
+			flash("You do not have permission to modify this website.")
+			return redirect(url_for("show_sites"))
 
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
@@ -286,11 +312,20 @@ def upload_files(site_id: int):
 @app.post("/upload_files/<int:site_id>/")
 @login_required
 def handle_upload_files(site_id: int):
-	# Make sure the user owns this site
+	# Check Permission
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
-		flash("You do not have permission to modify this website.")
-		return redirect(url_for("show_sites"))
+		# Check if this site has been shared with the current user.
+		found = False
+		links = site.shared_with
+		for l in links:
+			if l.user_id == current_user.id:
+				found = True
+				break
+
+		if not found:
+			flash("You do not have permission to modify this website.")
+			return redirect(url_for("show_sites"))
 
 	form = UploadFilesForm()
 	if form.validate():
@@ -324,7 +359,56 @@ def handle_upload_files(site_id: int):
 			flash(f"{field}: {error}")
 		return redirect(url_for('upload_files', site_id=site_id))
 
-	
+@app.get("/share_site/<int:site_id>/")
+@login_required
+def share_site_route(site_id: int):
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to share this website.")
+		return redirect(url_for("show_sites"))
+
+	form = ShareSiteForm()
+	current_shares = site.shared_with
+	return render_template('share_site.html', form=form, current_shares=current_shares, site_id=site_id)
+
+@app.post("/share_site/<int:site_id>/")
+@login_required
+def handle_share_site_route(site_id: int):
+	# Make sure the user owns this site
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to share this website.")
+		return redirect(url_for("show_sites"))
+
+	form = ShareSiteForm()
+	if form.validate():
+		# Get the ID
+		other_id = form.other_id.data
+
+		# Get the target user
+		target_user = User.query.get(other_id)
+
+		# Make sure the user exists
+		if target_user is None:
+			flash(f"User {other_id} does not exist")
+			return redirect(url_for('share_site_route', site_id=site_id))
+		
+		# Make sure the site isn't already shared with target user
+		current_targets = site.shared_with
+		for ct in current_targets:
+			if ct.user_id == other_id:
+				flash(f"You have already shared the site with {other_id}")
+				return redirect(url_for('share_site_route', site_id=site_id))
+			
+		# Share the website
+		share_site(target_user=target_user, site=site)
+		
+		return redirect(url_for("share_site_route", site_id=site_id))
+	else: # if the form was invalid
+		# flash error messages and redirect to get form again
+		for field, error in form.errors.items():
+			flash(f"{field}: {error}")
+		return redirect(url_for('share_site_route', site_id=site_id))
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
@@ -347,6 +431,53 @@ def sites_json():
 			'user_id': website.user_id
 		}
 		for website in websites
+	])
+
+	#return the json string
+	return json_data
+
+@app.get('/shared_sites_data/')
+def shared_sites_json():
+	#get current user
+	user = User.query.get(current_user.id)
+
+	#load all sites shared with the user
+	shared = user.shared_with_me
+	websites = []
+	for s in shared:
+		websites.append(s.site)
+
+	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
+			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
+			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}"
+		}
+		for website in websites
+	])
+
+	#return the json string
+	return json_data
+
+@app.get('/shared_users_data/<int:site_id>/')
+def shared_users_json(site_id: int):
+	# Get the site
+	site = Website.query.get(site_id)
+
+	# Load all users that the site is shared with
+	shared = site.shared_with
+	users = []
+	for s in shared:
+		users.append(s.user)
+
+	#jsonify that data
+	json_data = json.dumps([
+		{
+			'id': user.id, 'email': user.email,
+			'name': f"{user.fname} {user.lname}"
+		}
+		for user in users
 	])
 
 	#return the json string

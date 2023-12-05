@@ -2,7 +2,7 @@ from fileinput import filename
 import docker
 import os
 import shutil
-from database_manager import Website
+from database_manager import Website, PermissionLink
 
 from app import db
 
@@ -126,4 +126,15 @@ def delete_site(site):
 
     #3) delete the model record from the db
     db.session.delete(site)
+    db.session.commit()
+
+def share_site(target_user, site):
+    # Create an entry for sharing the given site with the given user
+    link = PermissionLink(user_id = target_user.id, site_id = site.id)
+    db.session.add(link)
+    db.session.commit()
+
+def unshare_site(permission_link):
+    # Delete the link from the database
+    db.session.delete(permission_link)
     db.session.commit()
