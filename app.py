@@ -83,9 +83,6 @@ class TraefikApp(Flask):
 		#restart all sites
 		with self.app_context():
 			websites = Website.query.all()
-			print('websites!!!')
-			print(websites)
-			print('==========')
 			client = docker.from_env()
 			#get and start each container
 			for website in websites:
