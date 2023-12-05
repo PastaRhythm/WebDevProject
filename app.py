@@ -20,6 +20,7 @@ import docker
 import json
 
 from constants import TRAEFIK_CONTAINER_NAME
+from database_manager import User, Website, db, seed_db
 
 #traefik router class
 class TraefikApp(Flask):
@@ -73,6 +74,40 @@ class TraefikApp(Flask):
 		finally:
 			client.close()
 
+		
+
+		#restart all stopped sites!
+		#REstart all stopped sites
+	
+	def restart_sites(self):
+		#restart all sites
+		with self.app_context():
+			websites = Website.query.all()
+			client = docker.from_env()
+			#get and start each container
+			for website in websites:
+				try:
+					print(f"Starting website '{website.name}'")
+
+					#get the traefik container
+					container = client.containers.get(website.name)
+
+					#check if the container is stopped
+					if container.status == "exited":
+						# Start the container
+						container.start()
+					else:
+						print(f"Container '{container.name}' is not stopped.")
+
+					print(f"'{website.name}' started successfully!")
+				except docker.errors.NotFound as e:
+					print("Creating traefik container!")
+					print("TODO: CREATE CONTAINER FOR THE SITE!")
+					#TODO: CREATE NEW CONTAINER
+
+				finally:
+					client.close()
+
 
 # configure this web application
 app = TraefikApp(__name__)
@@ -82,13 +117,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
-from database_manager import User, Website, db, seed_db
+#from database_manager import User, Website, db, seed_db
 from forms.loginForms import RegisterForm, LoginForm
 from forms.siteForms import NewSiteForm, UploadFilesForm
 from docker_functions.docker_site_funcs import *
 
 #init database
 db.init_app(app)
+app.restart_sites()
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
