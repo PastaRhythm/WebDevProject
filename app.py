@@ -79,6 +79,11 @@ class TraefikApp(Flask):
 		#restart all stopped sites!
 		#REstart all stopped sites
 	
+	def run(self):
+		self.restart_sites()
+		super(TraefikApp, self).run()
+
+	
 	def restart_sites(self):
 		#restart all sites
 		with self.app_context():
@@ -349,5 +354,4 @@ def sites_json():
 
 if __name__ == '__main__':
 	seed_db(app)
-	app.restart_sites()
 	app.run()
