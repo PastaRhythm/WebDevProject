@@ -15,7 +15,8 @@ def create_site(user, hostname):
         volume_path="",
         image="",
         hostname = hostname,
-        user=user
+        user=user,
+        plan=1
     )
     db.session.add(site)
     db.session.commit()
