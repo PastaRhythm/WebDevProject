@@ -4,9 +4,9 @@ This web app allows users to create websites for their businesses and organizati
 
 To run and test this app effectively, a few things need to be done:
     
-1. Create hostnames for testing.
-2. Install all dependencies.
-3. Understand database seeding.
+    1. Create hostnames for testing.
+    2. Install all dependencies.
+    3. Understand database seeding.
     
 
 1. Create hostnames for testing:
