@@ -101,9 +101,14 @@ class TraefikApp(Flask):
 
 					print(f"'{website.name}' started successfully!")
 				except docker.errors.NotFound as e:
-					print("Creating traefik container!")
-					print("TODO: CREATE CONTAINER FOR THE SITE!")
-					#TODO: CREATE NEW CONTAINER
+					print(f"Creating '{website.name}' container!")
+					#create a site container for the db record
+					try:
+						create_site(website.user, website.hostname, model=website)
+						#^pass model in to prevent creation of a new model
+					except docker.errors.APIError as e:
+						print(f"Error creating '{container.name}' container: {e}")
+						#raise   #raise most recently caught exception
 
 				finally:
 					client.close()
@@ -124,7 +129,7 @@ from docker_functions.docker_site_funcs import *
 
 #init database
 db.init_app(app)
-app.restart_sites()
+
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -343,5 +348,6 @@ def sites_json():
 	return json_data
 
 if __name__ == '__main__':
-	#seed_db(app)
+	seed_db(app)
+	app.restart_sites()
 	app.run()

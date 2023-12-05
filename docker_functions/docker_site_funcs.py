@@ -6,8 +6,8 @@ from database_manager import Website
 
 from app import db
 
-def create_site(user, hostname):
-    '''takes a user and a hostname, and creates a website for them with that hostname pointing to it'''
+def create_site(user, hostname, model=None):
+    '''takes a user and a hostname, and creates a website for them with that hostname pointing to it.  "model" is the model to use if a db model for this site already exists'''
     #0) insert blank record, and create a custom name for the container based on the user's id and container's id
     site = Website(
         name="",
@@ -18,6 +18,12 @@ def create_site(user, hostname):
         user=user,
         plan=1
     )
+
+    #check if model was passed in
+    if model != None:
+        site = model
+
+
     db.session.add(site)
     db.session.commit()
     container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{site.id}"
@@ -74,6 +80,11 @@ def create_site(user, hostname):
     site.docker_id = container_id
     site.image = container_image
     site.volume_path = f"/{container_name}"
+    
+    #use the preexisting model if it exists
+    if model != None:
+        site = model
+
     db.session.add(site)
     db.session.commit()
     print("Site saved!")
