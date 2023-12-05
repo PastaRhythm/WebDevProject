@@ -64,15 +64,18 @@ def seed_db(app):
                         billing_address = "Nowhere", role=1)
         user2 = User(fname="Luke", lname="Skywalker", password="theforce", email="luke.skywalker@gmail.com",
                         billing_address = "A galaxy far, far away", role=1)
-        site1 = Website(name="Billy's Farm", docker_id="32987310857", volume_path="/bb",
-                        image="httpd:2.4", user=user1, hostname="io.io", plan=1)
-        site2 = Website(name="Luke's Handbags", docker_id="238479", volume_path="/ls_bag",
-                        image="httpd:2.4", user=user2, hostname="org.org", plan=2)
-        site3 = Website(name="Luke's Therapy Sessions", docker_id="1010810108", volume_path="/ls_therapy",
-                        image="httpd:2.4", user=user2, hostname="com.com", plan=3)
+        site1 = Website(name='user_1BB_site_1', docker_id="32987310857", volume_path="/user_1BB_site_1",
+                        image="httpd:2.4", user=user1, hostname="host1.dockertest.internal", plan=1)
+        site2 = Website(name="user_2LS_site_2", docker_id="238479", volume_path="/user_2LS_site_2",
+                        image="httpd:2.4", user=user2, hostname="host2.dockertest.internal", plan=2)
+        # site3 = Website(name="Luke's Therapy Sessions", docker_id="1010810108", volume_path="/ls_therapy",
+        #                 image="httpd:2.4", user=user2, hostname="com.com", plan=3)
+
         
+
+
         users = [user1, user2]
-        sites = [site1, site2, site3]
+        sites = [site1, site2]#, site3]
 
         db.session.add_all(users)
         db.session.add_all(sites)
