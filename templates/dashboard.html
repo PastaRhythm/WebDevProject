@@ -1,14 +1,37 @@
 {% extends "main.html" %}
 
 {% block body %}
+<script src="/static/js/dashboard.js"></script>
 
-<h1>Dashboard</h1>
-<a href="/logout/">Log out</a>
-<br>
+<div id="admin_dashboard_menu" class="d-flex flex-column justify-content-start align-items-center bg-primary-subtle bg-gradient pt-4 px-1 gap-1">
+    <div id="dashboard_my_sites_tab" data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">My Sites</div>
+    <div id="dashboard_shared_sites_tab" data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Shared Sites</div>
+</div>
 
-<h3>Your sites:</h3>
-{% for w in websites %}
-    <a href="/website/{{w.id}}/"> {{w.name}} </a>
-{% endfor %}
+<style>
+    #admin_dashboard_menu{
+        position: fixed;
+        left: 0;
+        top: 2rem;
+        width: 10rem;
+        height: 100vh;
+    }
+
+    .dashboard_menu_item{
+        cursor: pointer;
+    }
+    .dashboard_menu_item:hover{
+        background-color: #9595ff;
+    }
+
+    .dashboard_selected_menu{
+        background-color: #7979ec;
+    }
+</style>
+
+
+<div  style="margin-left: 12rem;">
+    <div id="dashboard_body"></div>
+</div>
 
 {% endblock %}
