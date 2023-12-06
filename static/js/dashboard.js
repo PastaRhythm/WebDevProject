@@ -130,6 +130,8 @@ async function fetch_user_sites(){
 
         //add the delete button
         const del_btn = document.createElement('button')
+        del_btn.classList.add("btn")
+        del_btn.classList.add("btn-outline-primary")
         del_btn.addEventListener('click', (event)=>{
             delete_site(website.id)
         })
