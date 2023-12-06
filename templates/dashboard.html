@@ -2,15 +2,75 @@
 
 {% block body %}
 
+<div id="admin_dashboard_menu" class="d-flex flex-column justify-content-start align-items-center bg-primary-subtle bg-gradient pt-4 px-1 gap-1">
+    <div class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
+    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">lkdfj</div>
+    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
+    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
+    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
+
+    
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event)=>{
+        //get buttons
+        dashboard_menu_buttons = Array.from(document.querySelectorAll(".dashboard_menu_item"))
+
+        //map buttons to get their contents
+        dashboard_menu_buttons.map((btn)=>{
+            btn.addEventListener('click', (event)=>{
+                change_dashboard_active_tab(event, dashboard_menu_buttons)
+            })
+        })
+    })
+
+    //changes the active button, and sends a request to get the menu's contents
+    function change_dashboard_active_tab(event, btns){
+        //check if we clicked the already active tab
+        if (event.target.classList.contains("dashboard_selected_menu")){
+            return
+        }
+
+        //otherwise, remove the selected class from all buttons
+        btns.map((btn)=>{
+            btn.classList.remove('dashboard_selected_menu')
+        })
+
+        //add the class to the event target
+        event.target.classList.add('dashboard_selected_menu')
+
+    }
+
+    async function populate_dashboard_body(event){
+        //send the request to get the dashboard body
+
+        //place the body in the body div
+    }
+</script>
+
+<style>
+    #admin_dashboard_menu{
+        position: fixed;
+        left: 0;
+        top: 2rem;
+        width: 10rem;
+        height: 100vh;
+    }
+
+    .dashboard_menu_item:hover{
+        background-color: #9595ff;
+    }
+
+    .dashboard_selected_menu{
+        background-color: #7979ec;
+    }
+</style>
 
 
-<h1>Dashboard</h1>
-
-<br>
-
-<h3>Your sites:</h3>
-{% for w in websites %}
-    <a href="/website/{{w.id}}/"> {{w.name}} </a>
-{% endfor %}
+<div  style="margin-left: 12rem;">
+    <div id="dashboard_body"></div>
+</div>
 
 {% endblock %}
