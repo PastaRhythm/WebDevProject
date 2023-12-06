@@ -439,7 +439,7 @@ def sites_json():
 #routes for showing details about a user's sites
 @app.get('/shared-sites/')
 def show_shared_sites():
-	return "Shared Sites!"
+	return render_template('shared_sites.html')
 
 @app.get('/shared_sites_data/')
 def shared_sites_json():
