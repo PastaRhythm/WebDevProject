@@ -4,8 +4,8 @@
 <script src="/static/js/dashboard.js"></script>
 
 <div id="admin_dashboard_menu" class="d-flex flex-column justify-content-start align-items-center bg-primary-subtle bg-gradient pt-4 px-1 gap-1">
-    <div data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">My Sites</div>
-    <div data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Shared Sites</div>
+    <div id="dashboard_my_sites_tab" data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">My Sites</div>
+    <div id="dashboard_shared_sites_tab" data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Shared Sites</div>
 </div>
 
 <style>
