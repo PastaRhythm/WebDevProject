@@ -484,5 +484,5 @@ def shared_users_json(site_id: int):
 	return json_data
 
 if __name__ == '__main__':
-	seed_db(app)
+	#seed_db(app)
 	app.run()
