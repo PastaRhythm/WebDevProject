@@ -9,6 +9,21 @@
     <title>Web App</title>
 </head>
 <body>
+    <div class="fixed-top d-flex flex-row p-2 justify-content-end bg-primary gap-2">
+
+        {% if current_user.is_authenticated %}
+            <a class="link-light link-underline-opacity-25 link-underline-opacity-100-hover" href="{{ url_for('get_logout') }}">Log Out <i class="fa-solid fa-right-from-bracket"></i></a>
+
+        {% else %}
+            <a class="link-light link-underline-opacity-25 link-underline-opacity-100-hover" href="{{ url_for('login') }}">Log In <i class="fa-solid fa-right-to-bracket"></i></a>
+            <a class="link-light link-underline-opacity-25 link-underline-opacity-100-hover" href="{{ url_for('register') }}">Sign Up <i class="fa-solid fa-user-plus"></i></a>
+        {% endif %}
+    
+    </div>
+    <br>
+    <br>
+    {{current_user.is_authenticated}}
+
     <div class="flash_messages">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
