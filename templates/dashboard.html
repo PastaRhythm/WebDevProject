@@ -15,19 +15,25 @@
         //get buttons
         dashboard_menu_buttons = Array.from(document.querySelectorAll(".dashboard_menu_item"))
 
+        //get the body for the initially selected tab
+        const first_tab = document.querySelector('.dashboard_selected_menu')
+        populate_dashboard_body(first_tab)
+
         //map buttons to get their contents
         dashboard_menu_buttons.map((btn)=>{
             btn.addEventListener('click', (event)=>{
-                change_dashboard_active_tab(event, dashboard_menu_buttons)
-                
+                const clicked_tab = event.target
+                change_dashboard_active_tab(clicked_tab, dashboard_menu_buttons)
+                populate_dashboard_body(clicked_tab)
             })
         })
     })
 
+
     //changes the active button, and sends a request to get the menu's contents
-    function change_dashboard_active_tab(event, btns){
+    function change_dashboard_active_tab(clicked_tab, btns){
         //check if we clicked the already active tab
-        if (event.target.classList.contains("dashboard_selected_menu")){
+        if (clicked_tab.classList.contains("dashboard_selected_menu")){
             return
         }
 
@@ -37,14 +43,14 @@
         })
 
         //add the class to the event target
-        event.target.classList.add('dashboard_selected_menu')
+        clicked_tab.classList.add('dashboard_selected_menu')
 
         //make request to get the body and insert it
-        populate_dashboard_body(event)
+        //populate_dashboard_body(event)
 
     }
 
-    async function populate_dashboard_body(event){
+    async function populate_dashboard_body(clicked_tab){
 
         //get the dashboard body
         const body = document.getElementById("dashboard_body")
@@ -57,7 +63,7 @@
         body.appendChild(loader)
 
         //send the request to get the dashboard body
-        const response = await fetch(event.target.dataset.get_route)
+        const response = await fetch(clicked_tab.dataset.get_route)
         const body_content = await response.text()
         
         //place the body in the body div
