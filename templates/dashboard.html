@@ -45,9 +45,16 @@
     }
 
     async function populate_dashboard_body(event){
+
         //get the dashboard body
         const body = document.getElementById("dashboard_body")
-        console.log(event.target.dataset.get_route)
+        //console.log(event.target.dataset.get_route)
+
+        //set body to loader
+        const loader = create_loader()
+        loader.classList.add('fa-3x')
+        body.innerHTML = ""
+        body.appendChild(loader)
 
         //send the request to get the dashboard body
         const response = await fetch(event.target.dataset.get_route)
