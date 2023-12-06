@@ -436,6 +436,11 @@ def sites_json():
 	#return the json string
 	return json_data
 
+#routes for showing details about a user's sites
+@app.get('/shared-sites/')
+def show_shared_sites():
+	return "Shared Sites!"
+
 @app.get('/shared_sites_data/')
 def shared_sites_json():
 	#get current user

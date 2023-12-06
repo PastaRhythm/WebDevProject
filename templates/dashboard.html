@@ -3,11 +3,8 @@
 {% block body %}
 
 <div id="admin_dashboard_menu" class="d-flex flex-column justify-content-start align-items-center bg-primary-subtle bg-gradient pt-4 px-1 gap-1">
-    <div class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
-    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">lkdfj</div>
-    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
-    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
-    <div class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">aslkdfj</div>
+    <div data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">My Sites</div>
+    <div data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Shared Sites</div>
 
     
 
@@ -22,6 +19,7 @@
         dashboard_menu_buttons.map((btn)=>{
             btn.addEventListener('click', (event)=>{
                 change_dashboard_active_tab(event, dashboard_menu_buttons)
+                
             })
         })
     })
@@ -41,12 +39,22 @@
         //add the class to the event target
         event.target.classList.add('dashboard_selected_menu')
 
+        //make request to get the body and insert it
+        populate_dashboard_body(event)
+
     }
 
     async function populate_dashboard_body(event){
-        //send the request to get the dashboard body
+        //get the dashboard body
+        const body = document.getElementById("dashboard_body")
+        console.log(event.target.dataset.get_route)
 
+        //send the request to get the dashboard body
+        const response = await fetch(event.target.dataset.get_route)
+        const body_content = await response.text()
+        
         //place the body in the body div
+        body.innerHTML = body_content
     }
 </script>
 
