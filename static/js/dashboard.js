@@ -88,11 +88,12 @@ async function fetch_user_sites(){
     websites.map((website)=>{
         //create card
         const card = document.createElement('div')
-        card.classList.add('card')
+        card.classList.add('box')
+        card.classList.add('p-1')
         
         //add site name col
         const site_name = document.createElement('h5')
-        site_name.classList.add('card-title')
+        //site_name.classList.add('card-title')
         site_name.innerText = website.name
         card.appendChild(site_name)
 
@@ -101,7 +102,7 @@ async function fetch_user_sites(){
         // site_id.innerText = website.id
         // card.appendChild(site_id)
         const card_body = document.createElement('div')
-        card_body.classList.add('card-body')
+        //card_body.classList.add('card-body')
         card.appendChild(card_body)
 
         //add image col
@@ -109,12 +110,12 @@ async function fetch_user_sites(){
         // site_image.innerText = website.image
         // card.appendChild(site_image)
         const card_actions = document.createElement('div')
-        card_actions.classList.add('card-footer')
-        card_actions.classList.add('d-flex')
-        card_actions.classList.add('flex-row')
-        card_actions.classList.add('justify-content-end')
-        card_actions.classList.add('align-items-center')
-        card_actions.classList.add('gap-2')
+        //card_actions.classList.add('card-footer')
+        card_actions.classList.add('is-flex')
+        card_actions.classList.add('is-flex-row')
+        card_actions.classList.add('is-justify-content-flex-end')
+        card_actions.classList.add('is-align-items-center')
+        card_actions.classList.add('ml-2')
         card.appendChild(card_actions)
 
         //add visit link
@@ -155,8 +156,8 @@ async function fetch_user_sites(){
 
         //add the delete button
         const del_btn = document.createElement('button')
-        del_btn.classList.add("btn")
-        del_btn.classList.add("btn-outline-primary")
+        del_btn.classList.add("button")
+        del_btn.classList.add("is-primary")
         del_btn.addEventListener('click', (event)=>{
             delete_site(website.id)
         })
