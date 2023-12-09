@@ -1,0 +1,6 @@
+.link_btn{
+    color: hsl(217, 71%, 53%);
+}
+.link_btn:hover{
+    color: hsl(217, 76%, 37%);
+}

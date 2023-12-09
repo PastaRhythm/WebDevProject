@@ -3,10 +3,15 @@
 {% block body %}
 <script src="/static/js/dashboard.js"></script>
 
-<div id="admin_dashboard_menu" class="d-flex flex-column justify-content-start align-items-center bg-primary-subtle bg-gradient pt-4 px-1 gap-1">
-    <div id="dashboard_my_sites_tab" data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">My Sites</div>
-    <div id="dashboard_shared_sites_tab" data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Shared Sites</div>
-    <div id="dashboard_account_details_tab" data-get_route="/" class="dashboard_menu_item d-flex flex-column justify-content-center align-items-center cursor-pointer w-100 p-1">Account Details</div>
+<div class="menu has-text-light" id="admin_dashboard_menu">
+    <p class="menu-label pl-2">
+        Dashboard
+    </p>
+    <ul class="menu-list pl-4">
+        <li id="dashboard_my_sites_tab" data-get_route="{{ url_for('show_sites') }}" class="dashboard_selected_menu dashboard_menu_item p-1">My Sites</li>
+        <li id="dashboard_shared_sites_tab" data-get_route="{{ url_for('show_shared_sites') }}" class="dashboard_menu_item  p-1">Shared Sites</li>
+        <li id="dashboard_account_details_tab" data-get_route="/" class="dashboard_menu_item p-1">Account Details</li>
+    </ul>
 </div>
 
 <style>
@@ -16,22 +21,23 @@
         top: 2rem;
         width: 10rem;
         height: 100vh;
+        background-color: hsl(171, 59%, 60%);
     }
 
     .dashboard_menu_item{
         cursor: pointer;
     }
     .dashboard_menu_item:hover{
-        background-color: #9595ff;
+        background-color: hsl(217, 71%, 53%);
     }
 
     .dashboard_selected_menu{
-        background-color: #7979ec;
+        background-color: hsl(217, 76%, 37%);
     }
 </style>
 
 
-<div  style="margin-left: 12rem;">
+<div style="margin-left: 12rem;">
     <div id="dashboard_body"></div>
 </div>
 

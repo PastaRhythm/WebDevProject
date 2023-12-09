@@ -90,32 +90,24 @@ async function fetch_user_sites(){
         const card = document.createElement('div')
         card.classList.add('box')
         card.classList.add('p-1')
+        card.classList.add('column')
+        card.classList.add('is-two-fifths-mobile')
+        card.classList.add('is-one-third-desktop')
+        card.classList.add('is-one-fifth-fullhd')
+        card.classList.add('m-1')
         
         //add site name col
         const site_name = document.createElement('h5')
-        //site_name.classList.add('card-title')
         site_name.innerText = website.name
         card.appendChild(site_name)
 
-        //add site id col
-        // const site_id = document.createElement('td')
-        // site_id.innerText = website.id
-        // card.appendChild(site_id)
-        const card_body = document.createElement('div')
-        //card_body.classList.add('card-body')
-        card.appendChild(card_body)
 
-        //add image col
-        // const site_image = document.createElement('td')
-        // site_image.innerText = website.image
-        // card.appendChild(site_image)
+        //add action buttons
         const card_actions = document.createElement('div')
-        //card_actions.classList.add('card-footer')
         card_actions.classList.add('is-flex')
         card_actions.classList.add('is-flex-row')
         card_actions.classList.add('is-justify-content-flex-end')
         card_actions.classList.add('is-align-items-center')
-        card_actions.classList.add('ml-2')
         card.appendChild(card_actions)
 
         //add visit link
@@ -123,49 +115,53 @@ async function fetch_user_sites(){
         const visit_icon = document.createElement('i')
         visit_icon.classList.add('fa-eye')
         visit_icon.classList.add('fa-solid')
+        visit_icon.classList.add('link_btn')
         visit_link.appendChild(visit_icon)
+        visit_link.classList.add('ml-2')
         visit_link.href = "http://" + website.hostname
         card_actions.appendChild(visit_link)
 
         //Add file upload link
-        const upload_link = document.createElement('a')
         const upload_icon = document.createElement('i')
         upload_icon.classList.add('fa-upload')
         upload_icon.classList.add('fa-solid')
-        upload_link.appendChild(upload_icon)
-        upload_link.href = "/upload_files/" + website.id + "/"
-        card_actions.appendChild(upload_link)
+        upload_icon.classList.add('link_btn')
+        upload_icon.classList.add('ml-2')
+        card_actions.appendChild(upload_icon)
 
         //add terminal link
-        const terminal_link = document.createElement('a')
         const terminal_icon = document.createElement('i')
         terminal_icon.classList.add('fa-terminal')
         terminal_icon.classList.add('fa-solid')
-        terminal_link.appendChild(terminal_icon)
-        terminal_link.href = "/#"
-        card_actions.appendChild(terminal_link)
+        terminal_icon.classList.add('link_btn')
+        terminal_icon.classList.add('ml-2')
+        card_actions.appendChild(terminal_icon)
 
         //Add share link
         const share_link = document.createElement('a')
         const share_icon = document.createElement('i')
         share_icon.classList.add('fa-share')
         share_icon.classList.add('fa-solid')
+        share_icon.classList.add('link_btn')
+        share_link.classList.add('ml-2')
         share_link.appendChild(share_icon)
         share_link.href = "/share_site/" + website.id + "/"
         card_actions.appendChild(share_link)
 
         //add the delete button
-        const del_btn = document.createElement('button')
-        del_btn.classList.add("button")
-        del_btn.classList.add("is-primary")
-        del_btn.addEventListener('click', (event)=>{
+        //onst del_btn = document.createElement('button')
+        //.classList.add("button")
+        //del_btn.classList.add("is-primary")
+        const del_icon = document.createElement('i')
+        del_icon.addEventListener('click', (event)=>{
             delete_site(website.id)
         })
-        const icon = document.createElement('i')
-        icon.classList.add('fa-solid')
-        icon.classList.add('fa-trash')
-        del_btn.appendChild(icon)
-        card_actions.appendChild(del_btn)
+        del_icon.classList.add('link_btn')
+        del_icon.classList.add('fa-solid')
+        del_icon.classList.add('fa-trash')
+        del_icon.classList.add('ml-2')
+        //del_btn.appendChild(icon)
+        card_actions.appendChild(del_icon)
 
         //add tr to body
         user_websites_tbody.appendChild(card)
@@ -176,7 +172,7 @@ async function delete_site(id){
     console.log('deleting site!')
 
     //create and add loader
-    const user_websites_tbody = document.getElementById('user_websites_tbody')
+    const user_websites_tbody = document.getElementById('user_sites_dashboard_container')
     user_websites_tbody.innerHTML = ""
     user_websites_tbody.appendChild(create_loader())
 
