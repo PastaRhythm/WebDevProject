@@ -3,11 +3,11 @@
 <div>
     
 
-    <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
+    <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center mr-6">
         <h2 class="mb-5 is-size-4">My Sites</h2>
         <div class="is-flex flex-direction-row">
-            <a href="/"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="/new_site/" class="ml-3 mr-6"><i class="fa-solid fa-plus"></i> New Site</a>
+            <a href="/" class="link_btn mr-3 "><i class="fa-solid fa-house"></i> Home</a>
+            <div onclick="create_site_dialog.showModal()" class="link_btn" class="mr-6"><i class="fa-solid fa-plus"></i> New Site</div>
         </div>
     </div>
     
@@ -15,6 +15,10 @@
     <div id="user_sites_dashboard_container" class="columns is-multiline">
         
     </div>
+
+    <dialog id="create_site_dialog">
+        {% include 'create_site.html' %}
+    </dialog>
 
 
 </div>

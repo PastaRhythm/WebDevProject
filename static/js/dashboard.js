@@ -84,6 +84,10 @@ async function fetch_user_sites(){
     //clear current children, and add loader
     user_websites_tbody.innerHTML = ""  //clear all children
 
+    if (websites.length == 0){
+        user_websites_tbody.innerHTML = "<p>No sites yet.  Create one now!</p>"
+    }
+
     //insert data into table
     websites.map((website)=>{
         //create card
@@ -91,9 +95,7 @@ async function fetch_user_sites(){
         card.classList.add('box')
         card.classList.add('p-1')
         card.classList.add('column')
-        card.classList.add('is-two-fifths-mobile')
-        card.classList.add('is-one-third-desktop')
-        card.classList.add('is-one-fifth-fullhd')
+        card.classList.add('is-two-fifths')
         card.classList.add('m-1')
         
         //add site name col

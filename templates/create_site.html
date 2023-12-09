@@ -1,0 +1,22 @@
+
+<h1 class="is-size-4">New Website</h1>
+<hr>
+<form method="POST" action="{{ url_for('handle_new_site') }}">
+    {{form.hidden_tag()}}
+
+    <div class="field">
+        {{form.host_name.label(class="label")}}
+        {{form.host_name(class="input is-primary")}}
+    </div>
+    
+
+    <br>
+    <br>
+
+    <div class="is-flex is-flex-direction-row is-justify-content-end is-align-items-center">
+        {{form.submit(class="button is-link")}}
+        
+        <button type="button" class="button is-light ml-2" onclick="this.parentNode.parentNode.parentNode.close();">Cancel</button>
+    </div>
+    
+</form>
