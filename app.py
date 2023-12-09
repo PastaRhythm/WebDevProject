@@ -232,7 +232,7 @@ def dashboard():
 @login_required
 def new_site():
 	form = NewSiteForm()
-	return render_template('new_site.html', form=form)
+	return render_template('create_site.html', form=form)
 
 @app.post("/new_site/")
 @login_required
@@ -250,7 +250,7 @@ def handle_new_site():
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('new_site'))
+		return redirect(url_for('dashboard'))
 
 @app.post("/delete_site/<int:site_id>/")
 @login_required
@@ -258,7 +258,7 @@ def handle_del_site(site_id: int):
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
 		flash("You do not have permission to modify this website.")
-		return redirect(url_for("show_sites"))
+		return redirect(url_for("dashboard"))
 	
 	delete_site(site)
 
@@ -286,7 +286,7 @@ def handle_unshare_site(site_id: int, shared_user: int):
 @login_required
 def view_site(site_id: int):
 	site = Website.query.get(site_id)
-	return render_template("site_view.html", site=site)
+	return render_template("site_view.html", site=sit)
 
 @app.get("/upload_files/<int:site_id>/")
 @login_required
@@ -413,7 +413,7 @@ def handle_share_site_route(site_id: int):
 #routes for showing details about a user's sites
 @app.get('/sites/')
 def show_sites():
-	return render_template('sites.html')
+	return render_template('sites.html', form = NewSiteForm())
 
 @app.get('/sites_data/')
 def sites_json():

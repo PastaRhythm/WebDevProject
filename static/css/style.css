@@ -1,0 +1,23 @@
+.link_btn{
+    color: hsl(217, 71%, 53%);
+    cursor: pointer;
+}
+.link_btn:hover{
+    color: hsl(217, 76%, 37%);
+}
+
+dialog{
+    opacity: 0;
+    scale: 0;
+    rotate: 45deg;
+    display: block;
+    padding: 3rem;
+    border: 1px solid hsl(171, 100%, 41%);
+    transition: all 2.0s;
+}
+
+dialog[open]{
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+}
