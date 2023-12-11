@@ -1,4 +1,4 @@
-
+<h1 class="is-size-4">Upload files for site "{{ site.name_lbl }}"</h1>
 <form method="POST" action="{{ url_for('handle_upload_files', site_id=site.id) }}" enctype="multipart/form-data" class="is-flex is-flex-direction-column">
     {{form.hidden_tag()}}
 
@@ -27,7 +27,7 @@
     <br>
 
     <div>
-        {{form.submit(class="button is-primary")}}
+        {{form.submit(class="button is-link")}}
         <a href="{{ url_for('dashboard') }}" class="button">Back</a>
     </div>
     
