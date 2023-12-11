@@ -159,15 +159,14 @@ async function fetch_user_sites(){
         card_actions.appendChild(terminal_icon)
 
         //Add share link
-        const share_link = document.createElement('a')
         const share_icon = document.createElement('i')
         share_icon.classList.add('fa-share')
         share_icon.classList.add('fa-solid')
         share_icon.classList.add('link_btn')
-        share_link.classList.add('ml-2')
-        share_link.appendChild(share_icon)
-        share_link.href = "/share_site/" + website.id + "/"
-        card_actions.appendChild(share_link)
+        share_icon.classList.add('ml-2')
+        share_icon.dataset.site_id = website.id
+        share_icon.addEventListener('click', fetch_share_site_form)
+        card_actions.appendChild(share_icon)
 
         //add the delete button
         //onst del_btn = document.createElement('button')
@@ -309,3 +308,24 @@ async function fetch_upload_form(event){
 
 }
 //end functions for showing the upload files to website body
+//functions for showing the share site access form in website body
+async function fetch_share_site_form(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/share_site/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+    console.log("done")
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+
+}
+//end functions for showing the share site access form in website body
