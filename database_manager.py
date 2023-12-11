@@ -41,6 +41,8 @@ class Website(db.Model):
     image = db.Column(db.Unicode, nullable=False)
     hostname = db.Column(db.Unicode, nullable=False)
     plan = db.Column(db.Integer, nullable=False) # 1 is basic, 2 is middle, 3 is top
+    name_lbl = db.Column(db.Unicode, nullable=True)    #user-defined label to display in the site frontend
+    desc_lbl = db.Column(db.Unicode, nullable=True)    #user-defined description to display on the site frontend
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
     shared_with = db.relationship('PermissionLink', backref='site')
 
@@ -65,9 +67,9 @@ def seed_db(app):
         user2 = User(fname="Luke", lname="Skywalker", password="theforce", email="luke.skywalker@gmail.com",
                         billing_address = "A galaxy far, far away", role=1)
         site1 = Website(name='user_1BB_site_1', docker_id="32987310857", volume_path="/user_1BB_site_1",
-                        image="httpd:2.4", user=user1, hostname="host1.dockertest.internal", plan=1)
+                        image="httpd:2.4", user=user1, hostname="host1.dockertest.internal", plan=1, name_lbl="Billy's Worm Farm", desc_lbl="Join me in my journey into all things worm farming.  Worms are, after all, the - err, worms of the earth, as I always say.")
         site2 = Website(name="user_2LS_site_2", docker_id="238479", volume_path="/user_2LS_site_2",
-                        image="httpd:2.4", user=user2, hostname="host2.dockertest.internal", plan=2)
+                        image="httpd:2.4", user=user2, hostname="host2.dockertest.internal", plan=2, name_lbl="Luke's Lightsabers", desc_lbl="Custom lightsabers now available in my shop.  I can do all colors, even pink, yellow, and black.  How does a black ligthsaber even work?  Visit my site to find out!")
         # site3 = Website(name="Luke's Therapy Sessions", docker_id="1010810108", volume_path="/ls_therapy",
         #                 image="httpd:2.4", user=user2, hostname="com.com", plan=3)
 

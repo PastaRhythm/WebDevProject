@@ -5,6 +5,16 @@
     {{form.hidden_tag()}}
 
     <div class="field">
+        {{form.name_lbl.label(class="label")}}
+        {{form.name_lbl(class="input is-primary")}}
+    </div>
+
+    <div class="field">
+        {{form.desc_lbl.label(class="label")}}
+        {{form.desc_lbl(class="input is-primary")}}
+    </div>
+
+    <div class="field">
         {{form.host_name.label(class="label")}}
         {{form.host_name(class="input is-primary")}}
     </div>

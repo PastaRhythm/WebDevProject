@@ -1,43 +1,49 @@
-{% extends "main.html" %}
+<h1 class="is-size-4">Manage sharing for site "{{ site.name_lbl }}"</h1>
 
-{% block body %}
+<dialog id="create_new_share_dialog">
+    <h1 class="is-size-4">Share with new user</h1>
+    <hr>
+    <form method="POST" action="{{ url_for('handle_share_site_route', site_id=site.id) }}" enctype="multipart/form-data">
+        {{form.hidden_tag()}}
 
-<a href="/sites/">Cancel</a>
-<br>
+        <div class="field">
+            {{form.other_id.label(class="label")}}
+            {{form.other_id(class="input is-primary", list="user_share_list")}}
+            <datalist id="user_share_list">
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.fname }} {{ user.lname }} ({{ user.email }})</option>
+                {% endfor %}
+            </datalist>
+        </div>
 
-<h1>Share Site</h1>
+        <div class="is-flex is-flex-direction-row is-justify-content-end is-align-items-center">
+            {{form.submit(class="button is-link")}}
+            
+            <button type="button" class="button is-light ml-2" onclick="this.parentNode.parentNode.parentNode.close();">Cancel</button>
+        </div>
 
-<p>You can share your website with other users to let them view information about your site and upload files.</p>
+    </form>
+</dialog>
 
-<p>To add a user, enter their ID.</p>
+<input id="siteID" type="hidden" value="{{site.id}}">
 
-<P>Your ID: {{current_user.id}}</P>
-
-<h2>Share with New User</h2>
-<form method="POST" enctype="multipart/form-data">
-    {{form.hidden_tag()}}
-
-    {{form.other_id.label}}
-    {{form.other_id()}}
-    <br>
-
-    {{form.submit()}}
-</form>
-
-<input id="siteID" type="hidden" value="{{site_id}}">
-
-<h2>Currently Sharing With</h2>
-<table>
+<table class="table">
     <thead>
         <th>ID</th>
         <th>Name</th>
         <th>Email</th>
-        <th>Unshare</th>
+        <th>
+            <i class="link_btn fa-solid fa-plus" onclick="create_new_share_dialog.showModal()"></i>
+        </th>
     </thead>
     <tbody id="shared_body"></tbody>
 </table>
 
+<a href="{{ url_for('dashboard') }}" class="button">Back</a>
+
+
 <script>
+
     document.addEventListener('DOMContentLoaded', async ()=>{
         fill_shared();
     })
@@ -128,5 +134,3 @@
             });
     }
 </script>
-
-{% endblock %}

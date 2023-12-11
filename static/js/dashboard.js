@@ -64,6 +64,7 @@ async function populate_dashboard_body(clicked_tab){
         console.log("execute scripts for shared sites tab")
         fetch_shared_sites()
     }
+
 }
 
 //functions for rendering the user's sites table
@@ -93,15 +94,30 @@ async function fetch_user_sites(){
         //create card
         const card = document.createElement('div')
         card.classList.add('box')
-        card.classList.add('p-1')
+        card.classList.add('p-2')
         card.classList.add('column')
-        card.classList.add('is-two-fifths')
+        card.classList.add('is-one-quarter')
         card.classList.add('m-1')
-        
+        card.classList.add('has-shadow')
+        card.classList.add('min-height-300')
+        card.classList.add('is-flex')
+        card.classList.add('is-flex-direction-column')
+        card.classList.add('is-justify-content-space-between')
+
         //add site name col
         const site_name = document.createElement('h5')
-        site_name.innerText = website.name
+        site_name.innerText = website.name_lbl
+        site_name.classList.add('is-size-4')
         card.appendChild(site_name)
+
+        //add hr
+        //card.appendChild(document.createElement('hr'))
+
+        //add card body
+        const site_desc = document.createElement('p')
+        site_desc.innerText = website.desc_lbl
+        site_desc.classList.add('p-1')
+        card.appendChild(site_desc)
 
 
         //add action buttons
@@ -121,6 +137,7 @@ async function fetch_user_sites(){
         visit_link.appendChild(visit_icon)
         visit_link.classList.add('ml-2')
         visit_link.href = "http://" + website.hostname
+        visit_link.target = "_blank"
         card_actions.appendChild(visit_link)
 
         //Add file upload link
@@ -129,6 +146,8 @@ async function fetch_user_sites(){
         upload_icon.classList.add('fa-solid')
         upload_icon.classList.add('link_btn')
         upload_icon.classList.add('ml-2')
+        upload_icon.dataset.site_id = website.id
+        upload_icon.addEventListener('click', fetch_upload_form)
         card_actions.appendChild(upload_icon)
 
         //add terminal link
@@ -140,15 +159,14 @@ async function fetch_user_sites(){
         card_actions.appendChild(terminal_icon)
 
         //Add share link
-        const share_link = document.createElement('a')
         const share_icon = document.createElement('i')
         share_icon.classList.add('fa-share')
         share_icon.classList.add('fa-solid')
         share_icon.classList.add('link_btn')
-        share_link.classList.add('ml-2')
-        share_link.appendChild(share_icon)
-        share_link.href = "/share_site/" + website.id + "/"
-        card_actions.appendChild(share_link)
+        share_icon.classList.add('ml-2')
+        share_icon.dataset.site_id = website.id
+        share_icon.addEventListener('click', fetch_share_site_form)
+        card_actions.appendChild(share_icon)
 
         //add the delete button
         //onst del_btn = document.createElement('button')
@@ -269,3 +287,45 @@ async function fetch_shared_sites(){
 }
 
 //end functions for rendering the user's sites table
+//functions for showing the upload files to website body
+async function fetch_upload_form(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/upload_files/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+    console.log("done")
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+
+}
+//end functions for showing the upload files to website body
+//functions for showing the share site access form in website body
+async function fetch_share_site_form(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/share_site/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+    console.log("done")
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+
+}
+//end functions for showing the share site access form in website body

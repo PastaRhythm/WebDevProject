@@ -14,6 +14,7 @@ dialog{
     padding: 3rem;
     border: 1px solid hsl(171, 100%, 41%);
     transition: all 2.0s;
+    border-radius: 0.25rem;
 }
 
 dialog[open]{

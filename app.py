@@ -239,7 +239,7 @@ def new_site():
 def handle_new_site():
 	form = NewSiteForm()
 	if form.validate():
-		success = create_site(current_user, form.host_name.data)
+		success = create_site(current_user, form)
 		if (success):
 			# TODO: Have some nicer confirmation after creation
 			return redirect(url_for('show_sites'))
@@ -286,7 +286,7 @@ def handle_unshare_site(site_id: int, shared_user: int):
 @login_required
 def view_site(site_id: int):
 	site = Website.query.get(site_id)
-	return render_template("site_view.html", site=sit)
+	return render_template("site_view.html", site=site_id)
 
 @app.get("/upload_files/<int:site_id>/")
 @login_required
@@ -304,7 +304,7 @@ def upload_files(site_id: int):
 
 		if not found:
 			flash("You do not have permission to modify this website.")
-			return redirect(url_for("show_sites"))
+			return redirect(url_for("dashboard"))
 
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
@@ -325,7 +325,7 @@ def handle_upload_files(site_id: int):
 
 		if not found:
 			flash("You do not have permission to modify this website.")
-			return redirect(url_for("show_sites"))
+			return redirect(url_for("dashboard"))
 
 	form = UploadFilesForm()
 	if form.validate():
@@ -346,18 +346,18 @@ def handle_upload_files(site_id: int):
 			shutil.rmtree(unzip_path)
 			flash("Failed to unzip file. Are you sure you uploaded a zip file?")
 			print(f" -------- Couldn't unzip: {e}")
-			return redirect(url_for("upload_files", site_id=site_id))
+			return redirect(url_for("dashboard", site_id=site_id))
 
 		# Replace the files in the volume with the unzipped files
 		shutil.rmtree(vol_path)
 		shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
 
-		return redirect(url_for("show_sites"))
+		return redirect(url_for("dashboard"))
 	else: # if the form was invalid
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('upload_files', site_id=site_id))
+		return redirect(url_for('dashboard', site_id=site_id))
 
 @app.get("/share_site/<int:site_id>/")
 @login_required
@@ -367,9 +367,10 @@ def share_site_route(site_id: int):
 		flash("You do not have permission to share this website.")
 		return redirect(url_for("show_sites"))
 
+	users = User.query.filter(User.id != site.user_id).all()	#get all users to put in the datalist
 	form = ShareSiteForm()
 	current_shares = site.shared_with
-	return render_template('share_site.html', form=form, current_shares=current_shares, site_id=site_id)
+	return render_template('share_site.html', form=form, current_shares=current_shares, site=site, users=users)
 
 @app.post("/share_site/<int:site_id>/")
 @login_required
@@ -391,24 +392,24 @@ def handle_share_site_route(site_id: int):
 		# Make sure the user exists
 		if target_user is None:
 			flash(f"User {other_id} does not exist")
-			return redirect(url_for('share_site_route', site_id=site_id))
+			return redirect(url_for('dashboard', site_id=site_id))
 		
 		# Make sure the site isn't already shared with target user
 		current_targets = site.shared_with
 		for ct in current_targets:
 			if ct.user_id == other_id:
 				flash(f"You have already shared the site with {other_id}")
-				return redirect(url_for('share_site_route', site_id=site_id))
+				return redirect(url_for('dashboard', site_id=site_id))
 			
 		# Share the website
 		share_site(target_user=target_user, site=site)
 		
-		return redirect(url_for("share_site_route", site_id=site_id))
+		return redirect(url_for("dashboard", site_id=site_id))
 	else: # if the form was invalid
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('share_site_route', site_id=site_id))
+		return redirect(url_for('dashboard', site_id=site_id))
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
@@ -428,7 +429,8 @@ def sites_json():
 		{
 			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
 			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
-			'user_id': website.user_id
+			'user_id': website.user_id, "name_lbl": website.name_lbl,
+			"desc_lbl": website.desc_lbl
 		}
 		for website in websites
 	])
@@ -457,7 +459,8 @@ def shared_sites_json():
 		{
 			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
 			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
-			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}"
+			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}", "name_lbl": website.name_lbl,
+			"desc_lbl": website.desc_lbl
 		}
 		for website in websites
 	])

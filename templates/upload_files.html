@@ -1,29 +1,34 @@
-{% extends "main.html" %}
-
-{% block body %}
-
-<a href="/sites/">Cancel</a>
-<br>
-
-<h1>Upload Files</h1>
-
-<p>You must upload a zip file with the files for your site.</p>
-
-<p>If the zip file has an index.html at root, this will automatically be shown when a user visits the site.</p>
-
-<form method="POST" enctype="multipart/form-data">
+<h1 class="is-size-4">Upload files for site "{{ site.name_lbl }}"</h1>
+<form method="POST" action="{{ url_for('handle_upload_files', site_id=site.id) }}" enctype="multipart/form-data" class="is-flex is-flex-direction-column">
     {{form.hidden_tag()}}
 
-    {{form.zip_file.label}}
-    {{form.zip_file()}}
+    <br>
+    <br>
+    <br>
+    
+    <div class="field is-flex is-justify-content-center is-align-items-center">
+        <div class="file is-boxed">
+            <label class="file-label">
+                {{form.zip_file(class="file-input", type="file")}}
+                <span class="file-cta">
+                    <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">
+                        Upload a zip file…
+                    </span>
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <br>
+    <br>
     <br>
 
-    {{form.submit()}}
+    <div>
+        {{form.submit(class="button is-link")}}
+        <a href="{{ url_for('dashboard') }}" class="button">Back</a>
+    </div>
+    
 </form>
-
-<!-- <form method="POST" action="" enctype="multipart/form-data">
-    <p><input type="file" name="file" accept=".zip"></p>
-    <p><input type="submit" value="Upload"></p>
-</form> -->
-
-{% endblock %}

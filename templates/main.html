@@ -11,31 +11,40 @@
     <title>Web App</title>
 </head>
 <body>
-    <div class="is-flex is-flex-direction-row is-justify-content-flex-end has-background-primary py-1">
 
-        {% if current_user.is_authenticated %}
-            <a class="link_btn ml-1" href="{{ url_for('get_logout') }}">Log Out <i class="fa-solid fa-right-from-bracket"></i></a>
-            <a class="link_btn ml-1" href="{{ url_for('dashboard') }}">Dashboard <i class="fa-solid fa-gauge"></i></a>
-        {% else %}
-            <a class="link_btn ml-1" href="{{ url_for('login') }}">Log In <i class="fa-solid fa-right-to-bracket"></i></a>
-            <a class="link_btn ml-1" href="{{ url_for('register') }}">Sign Up <i class="fa-solid fa-user-plus"></i></a>
-        {% endif %}
+    <div class="has-background-primary p-1 is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
+        <a href="{{ url_for('index') }}" class="link_btn ml-2 "><i class="fa-solid fa-house"></i> Home</a>
     
+        <div class="is-flex is-flex-direction-row is-justify-content-flex-end">
+    
+            {% if current_user.is_authenticated %}
+                <a class="link_btn ml-1" href="{{ url_for('get_logout') }}">Log Out <i class="fa-solid fa-right-from-bracket"></i></a>
+                <a class="link_btn ml-1" href="{{ url_for('dashboard') }}">Dashboard <i class="fa-solid fa-gauge"></i></a>
+            {% else %}
+                <a class="link_btn ml-1" href="{{ url_for('login') }}">Log In <i class="fa-solid fa-right-to-bracket"></i></a>
+                <a class="link_btn ml-1" href="{{ url_for('register') }}">Sign Up <i class="fa-solid fa-user-plus"></i></a>
+            {% endif %}
+        
+        </div>
     </div>
+
     <br>
     <br>
 
-    <div class="flash_messages">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li class="alert alert-danger" role="alert">{{ message }}</li>
-                {% endfor %}
-            </ul>
+            <article class="message is-danger" id="flash_message_errors" style="position: fixed; right: 10px; bottom: 0px;">
+                <div class="message-header is-flex is-justify-content-space-between"><span>Problems were detected: </span>&nbsp;&nbsp;&nbsp;&nbsp;<button class="delete" aria-label="delete" onclick="document.getElementById('flash_message_errors').remove()"></button></div>
+                <div class="message-body" style="max-height: 10rem; overflow-y: auto;">
+                    <ul>
+                        {% for message in messages %}
+                            <li class="alert alert-danger" role="alert">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </article>
         {% endif %}
     {% endwith %}
-    </div>
 
     {% block body %}
     {% endblock %}

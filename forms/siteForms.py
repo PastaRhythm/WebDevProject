@@ -4,7 +4,9 @@ from wtforms.fields import SubmitField, StringField, SelectField, IntegerField
 from wtforms.validators import InputRequired, NumberRange
 
 class NewSiteForm(FlaskForm):
-    host_name = StringField("Host Name: ", validators=[InputRequired()])
+    host_name = StringField("Hostname: ", validators=[InputRequired()])
+    name_lbl = StringField("Site Name: ", validators=[InputRequired()])
+    desc_lbl = StringField("Site Description: ", validators=[InputRequired()])
     # pricing_plan = SelectField("Pricing Plan: ", coerce=int)
 
     submit = SubmitField("Create")
@@ -13,10 +15,10 @@ class UploadFilesForm(FlaskForm):
     # This gives a file path
     zip_file = FileField('Zip File: ', validators = [FileRequired(), FileAllowed(['zip'], "zip files only")])
 
-    submit = SubmitField("Set website files to selected")
+    submit = SubmitField("Update Website")
 
 class ShareSiteForm(FlaskForm):
     # This gives a file path
-    other_id = IntegerField('User ID: ', validators = [InputRequired(), NumberRange(min = 1)])
+    other_id = StringField('Share with (enter their id number): ', validators = [InputRequired()])
 
     submit = SubmitField("Share")
