@@ -239,7 +239,7 @@ def new_site():
 def handle_new_site():
 	form = NewSiteForm()
 	if form.validate():
-		success = create_site(current_user, form.host_name.data)
+		success = create_site(current_user, form)
 		if (success):
 			# TODO: Have some nicer confirmation after creation
 			return redirect(url_for('show_sites'))

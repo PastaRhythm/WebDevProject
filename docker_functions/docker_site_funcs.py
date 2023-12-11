@@ -6,7 +6,7 @@ from database_manager import Website, PermissionLink
 
 from app import db
 
-def create_site(user, hostname, model=None):
+def create_site(user, form_data, model=None):
     '''takes a user and a hostname, and creates a website for them with that hostname pointing to it.  "model" is the model to use if a db model for this site already exists'''
     #0) insert blank record, and create a custom name for the container based on the user's id and container's id
     site = Website(
@@ -14,7 +14,9 @@ def create_site(user, hostname, model=None):
         docker_id="",
         volume_path="",
         image="",
-        hostname = hostname,
+        hostname = form_data.host_name.data,
+        name_lbl = form_data.name_lbl.data,
+        desc_lbl = form_data.desc_lbl.data,
         user=user,
         plan=1
     )
@@ -59,7 +61,7 @@ def create_site(user, hostname, model=None):
             volumes = volume_config,
             labels = {
                 'traefik.enable': 'true',
-                f'traefik.http.routers.{container_name}.rule': f'Host(`{hostname}`)',
+                f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',
                 f'traefik.http.routers.{container_name}.entrypoints': 'web',
             },
         )  #remove ports later
