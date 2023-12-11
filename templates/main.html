@@ -31,17 +31,20 @@
     <br>
     <br>
 
-    <div class="flash_messages">
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li class="alert alert-danger" role="alert">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    </div>
+    <article class="message is-danger" id="flash_message_errors" style="position: fixed; right: 10px; bottom: 0px;">
+        <div class="message-header is-flex is-justify-content-space-between"><span>Problems were detected: </span>&nbsp;&nbsp;&nbsp;&nbsp;<button class="delete" aria-label="delete" onclick="document.getElementById('flash_message_errors').remove()"></button></div>
+        <div class="message-body" style="max-height: 10rem; overflow-y: auto;">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li class="alert alert-danger" role="alert">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </article>
 
     {% block body %}
     {% endblock %}
