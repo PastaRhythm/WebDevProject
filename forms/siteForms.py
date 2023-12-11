@@ -19,6 +19,6 @@ class UploadFilesForm(FlaskForm):
 
 class ShareSiteForm(FlaskForm):
     # This gives a file path
-    other_id = IntegerField('User ID: ', validators = [InputRequired(), NumberRange(min = 1)])
+    other_id = StringField('Share with (enter their id number): ', validators = [InputRequired()])
 
     submit = SubmitField("Share")
