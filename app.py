@@ -286,7 +286,7 @@ def handle_unshare_site(site_id: int, shared_user: int):
 @login_required
 def view_site(site_id: int):
 	site = Website.query.get(site_id)
-	return render_template("site_view.html", site=sit)
+	return render_template("site_view.html", site=site_id)
 
 @app.get("/upload_files/<int:site_id>/")
 @login_required

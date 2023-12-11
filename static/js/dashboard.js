@@ -64,6 +64,7 @@ async function populate_dashboard_body(clicked_tab){
         console.log("execute scripts for shared sites tab")
         fetch_shared_sites()
     }
+
 }
 
 //functions for rendering the user's sites table
@@ -145,6 +146,8 @@ async function fetch_user_sites(){
         upload_icon.classList.add('fa-solid')
         upload_icon.classList.add('link_btn')
         upload_icon.classList.add('ml-2')
+        upload_icon.dataset.site_id = website.id
+        upload_icon.addEventListener('click', fetch_upload_form)
         card_actions.appendChild(upload_icon)
 
         //add terminal link
@@ -285,3 +288,24 @@ async function fetch_shared_sites(){
 }
 
 //end functions for rendering the user's sites table
+//functions for showing the upload files to website body
+async function fetch_upload_form(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/upload_files/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+    console.log("done")
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+
+}
+//end functions for showing the upload files to website body
