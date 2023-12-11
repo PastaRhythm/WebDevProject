@@ -367,9 +367,10 @@ def share_site_route(site_id: int):
 		flash("You do not have permission to share this website.")
 		return redirect(url_for("show_sites"))
 
+	users = User.query.filter(User.id != site.user_id).all()	#get all users to put in the datalist
 	form = ShareSiteForm()
 	current_shares = site.shared_with
-	return render_template('share_site.html', form=form, current_shares=current_shares, site_id=site_id)
+	return render_template('share_site.html', form=form, current_shares=current_shares, site=site, users=users)
 
 @app.post("/share_site/<int:site_id>/")
 @login_required
@@ -391,24 +392,24 @@ def handle_share_site_route(site_id: int):
 		# Make sure the user exists
 		if target_user is None:
 			flash(f"User {other_id} does not exist")
-			return redirect(url_for('share_site_route', site_id=site_id))
+			return redirect(url_for('dashboard', site_id=site_id))
 		
 		# Make sure the site isn't already shared with target user
 		current_targets = site.shared_with
 		for ct in current_targets:
 			if ct.user_id == other_id:
 				flash(f"You have already shared the site with {other_id}")
-				return redirect(url_for('share_site_route', site_id=site_id))
+				return redirect(url_for('dashboard', site_id=site_id))
 			
 		# Share the website
 		share_site(target_user=target_user, site=site)
 		
-		return redirect(url_for("share_site_route", site_id=site_id))
+		return redirect(url_for("dashboard", site_id=site_id))
 	else: # if the form was invalid
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('share_site_route', site_id=site_id))
+		return redirect(url_for('dashboard', site_id=site_id))
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
