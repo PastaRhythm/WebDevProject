@@ -428,7 +428,8 @@ def sites_json():
 		{
 			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
 			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
-			'user_id': website.user_id
+			'user_id': website.user_id, "name_lbl": website.name_lbl,
+			"desc_lbl": website.desc_lbl
 		}
 		for website in websites
 	])
@@ -457,7 +458,8 @@ def shared_sites_json():
 		{
 			'id': website.id, 'name': website.name, 'docker_id': website.docker_id,
 			'volume_path': website.volume_path, 'image': website.image, 'hostname': website.hostname,
-			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}"
+			'user_id': website.user_id, 'owner_name': f"{website.user.fname} {website.user.lname}", "name_lbl": website.name_lbl,
+			"desc_lbl": website.desc_lbl
 		}
 		for website in websites
 	])
@@ -489,5 +491,5 @@ def shared_users_json(site_id: int):
 	return json_data
 
 if __name__ == '__main__':
-	seed_db(app)
+	#seed_db(app)
 	app.run()

@@ -93,15 +93,26 @@ async function fetch_user_sites(){
         //create card
         const card = document.createElement('div')
         card.classList.add('box')
-        card.classList.add('p-1')
+        card.classList.add('p-2')
         card.classList.add('column')
-        card.classList.add('is-two-fifths')
+        card.classList.add('is-one-quarter')
         card.classList.add('m-1')
-        
+        card.classList.add('has-shadow')
+
         //add site name col
         const site_name = document.createElement('h5')
-        site_name.innerText = website.name
+        site_name.innerText = website.name_lbl
+        site_name.classList.add('is-size-4')
         card.appendChild(site_name)
+
+        //add hr
+        //card.appendChild(document.createElement('hr'))
+
+        //add card body
+        const site_desc = document.createElement('p')
+        site_desc.innerText = website.desc_lbl
+        site_desc.classList.add('p-1')
+        card.appendChild(site_desc)
 
 
         //add action buttons
