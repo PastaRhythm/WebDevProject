@@ -41,6 +41,8 @@ class Website(db.Model):
     image = db.Column(db.Unicode, nullable=False)
     hostname = db.Column(db.Unicode, nullable=False)
     plan = db.Column(db.Integer, nullable=False) # 1 is basic, 2 is middle, 3 is top
+    name_lbl = db.Column(db.Unicode, nullable=True)    #user-defined label to display in the site frontend
+    desc_lbl = db.Column(db.Unicode, nullable=True)    #user-defined description to display on the site frontend
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
     shared_with = db.relationship('PermissionLink', backref='site')
 
