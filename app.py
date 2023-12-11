@@ -304,7 +304,7 @@ def upload_files(site_id: int):
 
 		if not found:
 			flash("You do not have permission to modify this website.")
-			return redirect(url_for("show_sites"))
+			return redirect(url_for("dashboard"))
 
 	form = UploadFilesForm()
 	return render_template('upload_files.html', form=form, site=site)
@@ -325,7 +325,7 @@ def handle_upload_files(site_id: int):
 
 		if not found:
 			flash("You do not have permission to modify this website.")
-			return redirect(url_for("show_sites"))
+			return redirect(url_for("dashboard"))
 
 	form = UploadFilesForm()
 	if form.validate():
@@ -346,18 +346,18 @@ def handle_upload_files(site_id: int):
 			shutil.rmtree(unzip_path)
 			flash("Failed to unzip file. Are you sure you uploaded a zip file?")
 			print(f" -------- Couldn't unzip: {e}")
-			return redirect(url_for("upload_files", site_id=site_id))
+			return redirect(url_for("dashboard", site_id=site_id))
 
 		# Replace the files in the volume with the unzipped files
 		shutil.rmtree(vol_path)
 		shutil.move(src=unzip_path, dst=f"{os.path.dirname(os.path.abspath(__file__))}/volumes/")
 
-		return redirect(url_for("show_sites"))
+		return redirect(url_for("dashboard"))
 	else: # if the form was invalid
 		# flash error messages and redirect to get form again
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
-		return redirect(url_for('upload_files', site_id=site_id))
+		return redirect(url_for('dashboard', site_id=site_id))
 
 @app.get("/share_site/<int:site_id>/")
 @login_required

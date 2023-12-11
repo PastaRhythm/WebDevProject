@@ -15,7 +15,7 @@ class UploadFilesForm(FlaskForm):
     # This gives a file path
     zip_file = FileField('Zip File: ', validators = [FileRequired(), FileAllowed(['zip'], "zip files only")])
 
-    submit = SubmitField("Set website files to selected")
+    submit = SubmitField("Update Website")
 
 class ShareSiteForm(FlaskForm):
     # This gives a file path
