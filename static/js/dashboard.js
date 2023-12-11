@@ -98,6 +98,10 @@ async function fetch_user_sites(){
         card.classList.add('is-one-quarter')
         card.classList.add('m-1')
         card.classList.add('has-shadow')
+        card.classList.add('min-height-300')
+        card.classList.add('is-flex')
+        card.classList.add('is-flex-direction-column')
+        card.classList.add('is-justify-content-space-between')
 
         //add site name col
         const site_name = document.createElement('h5')
@@ -132,6 +136,7 @@ async function fetch_user_sites(){
         visit_link.appendChild(visit_icon)
         visit_link.classList.add('ml-2')
         visit_link.href = "http://" + website.hostname
+        visit_link.target = "_blank"
         card_actions.appendChild(visit_link)
 
         //Add file upload link
