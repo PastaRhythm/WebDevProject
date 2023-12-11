@@ -4,7 +4,9 @@ from wtforms.fields import SubmitField, StringField, SelectField, IntegerField
 from wtforms.validators import InputRequired, NumberRange
 
 class NewSiteForm(FlaskForm):
-    host_name = StringField("Host Name: ", validators=[InputRequired()])
+    host_name = StringField("Hostname: ", validators=[InputRequired()])
+    name_lbl = StringField("Site Name: ", validators=[InputRequired()])
+    desc_lbl = StringField("Site Description: ", validators=[InputRequired()])
     # pricing_plan = SelectField("Pricing Plan: ", coerce=int)
 
     submit = SubmitField("Create")
