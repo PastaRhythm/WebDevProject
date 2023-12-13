@@ -1,0 +1,14 @@
+{
+  "name": "webdevproject",
+  "version": "1.0.0",
+  "description": "CSSuper project for Web Dev",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Graham, Felton, Tziovannis",
+  "license": "ISC",
+  "dependencies": {
+    "xterm": "^5.3.0"
+  }
+}

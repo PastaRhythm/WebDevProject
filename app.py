@@ -295,7 +295,7 @@ def handle_unshare_site(site_id: int, shared_user: int):
 @login_required
 def view_site(site_id: int):
 	site = Website.query.get(site_id)
-	return render_template("site_view.html", site=site_id)
+	return render_template("site_view.html", site=site)
 
 @app.get("/upload_files/<int:site_id>/")
 @login_required
@@ -419,6 +419,26 @@ def handle_share_site_route(site_id: int):
 		for field, error in form.errors.items():
 			flash(f"{field}: {error}")
 		return redirect(url_for('dashboard', site_id=site_id))
+
+@app.get("/terminal/<int:site_id>/")
+@login_required
+def terminal_page(site_id: int):
+	# Check Permission
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		# Check if this site has been shared with the current user.
+		found = False
+		links = site.shared_with
+		for l in links:
+			if l.user_id == current_user.id:
+				found = True
+				break
+
+		if not found:
+			flash("You do not have permission to modify this website.")
+			return redirect(url_for("dashboard"))
+	
+	return render_template("terminal.html", site=site)
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
