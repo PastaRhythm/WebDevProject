@@ -151,12 +151,16 @@ async function fetch_user_sites(){
         card_actions.appendChild(upload_icon)
 
         //add terminal link
+        const terminal_link = document.createElement('a')
         const terminal_icon = document.createElement('i')
         terminal_icon.classList.add('fa-terminal')
         terminal_icon.classList.add('fa-solid')
         terminal_icon.classList.add('link_btn')
-        terminal_icon.classList.add('ml-2')
-        card_actions.appendChild(terminal_icon)
+        terminal_link.appendChild(terminal_icon)
+        terminal_link.classList.add('ml-2')
+        terminal_link.href = `/terminal/${website.id}/`
+        card_actions.appendChild(terminal_link)
+        
 
         //Add share link
         const share_icon = document.createElement('i')
