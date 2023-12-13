@@ -109,7 +109,16 @@ class TraefikApp(Flask):
 					print(f"Creating '{website.name}' container!")
 					#create a site container for the db record
 					try:
-						create_site(website.user, website.hostname, model=website)
+						class Fitter:
+							def __init__(self, hostname):
+								class Fitter2:
+									def __init__(self, data) -> None:
+										self.data = data
+								self.host_name = Fitter2(hostname)
+								self.name_lbl = Fitter2(website.name_lbl)
+								self.desc_lbl = Fitter2(website.desc_lbl)
+						tmp = Fitter(website.hostname)
+						create_site(website.user, tmp, model=website)
 						#^pass model in to prevent creation of a new model
 					except docker.errors.APIError as e:
 						print(f"Error creating '{container.name}' container: {e}")
