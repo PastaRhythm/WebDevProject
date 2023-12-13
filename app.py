@@ -109,6 +109,7 @@ class TraefikApp(Flask):
 					print(f"Creating '{website.name}' container!")
 					#create a site container for the db record
 					try:
+						#classes to make sites that don't have a form fit the arg requirements for create_site
 						class Fitter:
 							def __init__(self, hostname):
 								class Fitter2:
