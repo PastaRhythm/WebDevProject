@@ -1,4 +1,5 @@
 /_env
+/node_modules
 /volumes/*
 /unzip/*
 *cpython*
