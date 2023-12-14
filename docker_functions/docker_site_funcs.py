@@ -130,6 +130,10 @@ def delete_site(site):
     db.session.delete(site)
     db.session.commit()
 
+def update_site_plan(site: Website, newPlan: int):
+    # TODO: Implement this
+    pass
+
 def share_site(target_user, site):
     # Create an entry for sharing the given site with the given user
     link = PermissionLink(user_id = target_user.id, site_id = site.id)

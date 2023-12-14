@@ -375,7 +375,7 @@ def share_site_route(site_id: int):
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
 		flash("You do not have permission to share this website.")
-		return redirect(url_for("show_sites"))
+		return redirect(url_for("dashboard"))
 
 	users = User.query.filter(User.id != site.user_id).all()	#get all users to put in the datalist
 	form = ShareSiteForm()
@@ -389,7 +389,7 @@ def handle_share_site_route(site_id: int):
 	site = Website.query.get(site_id)
 	if site.user_id != current_user.id:
 		flash("You do not have permission to share this website.")
-		return redirect(url_for("show_sites"))
+		return redirect(url_for("dashboard"))
 
 	form = ShareSiteForm()
 	if form.validate():
@@ -440,6 +440,17 @@ def terminal_page(site_id: int):
 			return redirect(url_for("dashboard"))
 	
 	return render_template("terminal.html", site=site)
+
+@app.get("/plan/<int:site_id>/")
+@login_required
+def plan_page(site_id: int):
+	# Make sure the user owns this site
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("dashboard"))
+	
+	return render_template("plan_select.html", site=site)
 
 #routes for showing details about a user's sites
 @app.get('/sites/')
@@ -522,5 +533,5 @@ def shared_users_json(site_id: int):
 	return json_data
 
 if __name__ == '__main__':
-	#seed_db(app)
+	seed_db(app)
 	app.run()

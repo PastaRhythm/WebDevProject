@@ -1,0 +1,52 @@
+{% extends "main.html" %}
+
+{% block body %}
+
+<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+<br>
+
+<h1>{{site.name_lbl}}</h1>
+<h3>Current Plan: 
+    {% if site.plan == 1 %}
+        Basic
+    {% elif site.plan == 2 %}
+        Standard
+    {% else %}
+        Pro
+    {% endif %}
+</h3>
+
+<br><br>
+
+<h3>Select a new plan:</h3>
+<br>
+
+<div class="columns">
+    <div class="column">
+        <h2>Basic</h2>
+        <ul>
+            <li>1 Core</li>
+            <li>128 MB of memory</li>
+        </ul>
+        <p>Sufficient for simple websites, like an site about yourself or an information portal.</p>
+    </div>
+    <div class="column">
+        <h2>Standard</h2>
+        <ul>
+            <li>2 Cores</li>
+            <li>512 MB of memory</li>
+        </ul>
+        <p>For sites that need more than the bare minimum functionality and interactivity. Good for sites that need to run heavy JavaScript code.</p>
+    </div>
+    <div class="column">
+        <h2>Pro</h2>
+        <ul>
+            <li>4 Cores</li>
+            <li>1 GB of memory</li>
+            <li>Access to Bash terminal</li>
+        </ul>
+        <p>If you have a heavy-duty site and need full control over the server, this is the plan for you.</p>
+    </div>
+</div>
+
+{% endblock %}
