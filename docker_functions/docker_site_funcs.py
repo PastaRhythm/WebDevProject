@@ -90,6 +90,9 @@ def create_site(user, form_data, model=None):
     db.session.add(site)
     db.session.commit()
     print("Site saved!")
+
+    update_site_plan(site, site.plan)
+
     return True
 
 def delete_site(site):
@@ -131,7 +134,36 @@ def delete_site(site):
     db.session.commit()
 
 def update_site_plan(site: Website, newPlan: int):
-    # TODO: Make it so when you change the site plan, it alters the properties of the container.
+    planIndex = newPlan-1
+    cores = ["0", "0-1", "0-3"]
+    memory = ["128m", "512m", "1g"]
+
+    # Edit the attributes of the container
+    client = docker.from_env()
+    try:
+        #get the site's container
+        container = client.containers.get(site.name)
+
+        # print(" ~~ CONTAINER ATTRS ~~")
+        # for attrKey in container.attrs["HostConfig"].items():
+        #     if "cpu" in attrKey[0].lower():
+        #         print(f" *********** {attrKey[0]}: {attrKey[1]}")
+        #     else:
+        #         print(f" {attrKey[0]}: {attrKey[1]}")
+        # print(" ~~ END ~~")
+
+        # container.attrs["HostConfig"]["CpusetCpus"] = cores[newPlan-1]
+
+        container.update(cpuset_cpus = cores[planIndex], mem_limit = memory[planIndex], memswap_limit = memory[planIndex])
+
+        container.reload()
+        
+
+    except docker.errors.APIError as e:
+        print(f"Couldn't change container properties: {e}")
+        raise   #raise most recently caught exception
+    finally:
+        client.close()
 
     # Update the model record in the db
     site.plan = newPlan
