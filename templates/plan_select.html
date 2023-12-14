@@ -6,15 +6,7 @@
 <br>
 
 <h1>{{site.name_lbl}}</h1>
-<h3>Current Plan: 
-    {% if site.plan == 1 %}
-        Basic
-    {% elif site.plan == 2 %}
-        Standard
-    {% else %}
-        Pro
-    {% endif %}
-</h3>
+<h3 id="current_plan_heading">Current Plan: -</h3>
 
 <br><br>
 
@@ -29,6 +21,9 @@
             <li>128 MB of memory</li>
         </ul>
         <p>Sufficient for simple websites, like an site about yourself or an information portal.</p>
+        <br>
+
+        <div id="basic_div"></div>
     </div>
     <div class="column">
         <h2>Standard</h2>
@@ -37,6 +32,9 @@
             <li>512 MB of memory</li>
         </ul>
         <p>For sites that need more than the bare minimum functionality and interactivity. Good for sites that need to run heavy JavaScript code.</p>
+        <br>
+
+        <div id="standard_div"></div>
     </div>
     <div class="column">
         <h2>Pro</h2>
@@ -46,7 +44,99 @@
             <li>Access to Bash terminal</li>
         </ul>
         <p>If you have a heavy-duty site and need full control over the server, this is the plan for you.</p>
+        <br>
+
+        <div id="pro_div"></div>
     </div>
 </div>
+
+<input id="siteID" type="hidden" value={{site.id}}>
+<input id="sitePlan" type="hidden" value={{site.plan}}>
+
+<script>
+    const planNames = ["Basic", "Standard", "Pro"];
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
+        setupPage(sitePlan);
+    });
+
+    function setupPage(sitePlan) {
+        const currentPlanHeading = document.getElementById("current_plan_heading");
+        currentPlanHeading.innerText = `Current Plan: ${planNames[sitePlan-1]}`;
+
+        // Fill the plan divs
+        const basicDiv = document.getElementById("basic_div");
+        basicDiv.innerHTML = "";
+        if (sitePlan == 1) {
+            const txt = document.createElement("p");
+            txt.innerText = "~ Current Plan ~";
+            basicDiv.appendChild(txt);
+        } else {
+            const btn = document.createElement("button");
+            btn.classList.add("button", "is-primary");
+            btn.innerText = "Select Basic Plan";
+            basicDiv.appendChild(btn);
+            btn.addEventListener("click", doBasicPlan);
+        }
+
+        const standardDiv = document.getElementById("standard_div");
+        standardDiv.innerHTML = "";
+        if (sitePlan == 2) {
+            const txt = document.createElement("p");
+            txt.innerText = "~ Current Plan ~";
+            standardDiv.appendChild(txt);
+        } else {
+            const btn = document.createElement("button");
+            btn.classList.add("button", "is-primary");
+            btn.innerText = "Select Standard Plan";
+            standardDiv.appendChild(btn);
+            btn.addEventListener("click", doStandardPlan);
+        }
+
+        const proDiv = document.getElementById("pro_div");
+        proDiv.innerHTML = "";
+        if (sitePlan == 3) {
+            const txt = document.createElement("p");
+            txt.innerText = "~ Current Plan ~";
+            proDiv.appendChild(txt);
+        } else {
+            const btn = document.createElement("button");
+            btn.classList.add("button", "is-primary");
+            btn.innerText = "Select Pro Plan";
+            proDiv.appendChild(btn);
+            btn.addEventListener("click", doProPlan);
+        }
+    }
+
+    function doBasicPlan() { changePlan(1); }
+    function doStandardPlan() { changePlan(2); }
+    function doProPlan() { changePlan(3); }
+
+    function changePlan(newPlan) {
+        const siteID = Number.parseInt(document.getElementById("siteID").value);
+
+        fetch("/change_plan/" + siteID + "/" + newPlan + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        })
+        .then(response => {
+            //check if the request was successful (status code 2xx)
+            if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            //if the response is ok, refresh the page contents
+            console.log(`Set site ${siteID} to plan ${newPlan}`);
+            setupPage(newPlan);
+        })
+        .catch(error => {
+            //handle errors during the fetch
+            console.error('Fetch error:', error);
+        });
+    }
+
+</script>
 
 {% endblock %}

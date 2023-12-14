@@ -131,8 +131,11 @@ def delete_site(site):
     db.session.commit()
 
 def update_site_plan(site: Website, newPlan: int):
-    # TODO: Implement this
-    pass
+    # TODO: Make it so when you change the site plan, it alters the properties of the container.
+
+    # Update the model record in the db
+    site.plan = newPlan
+    db.session.commit()
 
 def share_site(target_user, site):
     # Create an entry for sharing the given site with the given user

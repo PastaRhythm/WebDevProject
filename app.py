@@ -452,6 +452,18 @@ def plan_page(site_id: int):
 	
 	return render_template("plan_select.html", site=site)
 
+@app.post("/change_plan/<int:site_id>/<int:plan>/")
+@login_required
+def handle_change_plan(site_id: int, plan: int):
+	site = Website.query.get(site_id)
+	if site.user_id != current_user.id:
+		flash("You do not have permission to modify this website.")
+		return redirect(url_for("dashboard"))
+	
+	update_site_plan(site, plan)
+
+	return f"Update plan: {site_id}"
+
 #routes for showing details about a user's sites
 @app.get('/sites/')
 def show_sites():
