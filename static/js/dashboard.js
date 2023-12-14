@@ -172,6 +172,17 @@ async function fetch_user_sites(){
         share_icon.addEventListener('click', fetch_share_site_form)
         card_actions.appendChild(share_icon)
 
+        //Add plan link
+        const plan_link = document.createElement('a')
+        const plan_icon = document.createElement('i')
+        plan_icon.classList.add('fa-dollar-sign')
+        plan_icon.classList.add('fa-solid')
+        plan_icon.classList.add('link_btn')
+        plan_link.appendChild(plan_icon)
+        plan_link.classList.add('ml-2')
+        plan_link.href = `/plan/${website.id}/`
+        card_actions.appendChild(plan_link)
+
         //add the delete button
         //onst del_btn = document.createElement('button')
         //.classList.add("button")
