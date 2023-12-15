@@ -1,48 +1,39 @@
-{% extends "main.html" %}
 
-{% block body %}
+<h1 class="is-size-4">Manage Plan For "{{site.name_lbl}}"</h1>
+<h3 id="current_plan_heading" class="is-size-5">Current Plan: -</h3>
 
-<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 <br>
 
-<h1>{{site.name_lbl}}</h1>
-<h3 id="current_plan_heading">Current Plan: -</h3>
-
-<br><br>
-
-<h3>Select a new plan:</h3>
-<br>
-
-<div class="columns">
-    <div class="column">
-        <h2>Basic</h2>
+<div class="columns mr-2">
+    <div class="column box mx-2 content">
+        <h2>Basic</h2> <!-- class="is-size-2" -->
         <ul>
             <li>1 Core</li>
             <li>128 MB of memory</li>
+            <li>No terminal</li>
         </ul>
         <p>Sufficient for simple websites, like an site about yourself or an information portal.</p>
-        <br>
+        <hr>
 
         <p>$2.99/Year</p>
-        <br>
 
         <div id="basic_div"></div>
     </div>
-    <div class="column">
+    <div class="column box mx-2 content">
         <h2>Standard</h2>
         <ul>
             <li>2 Cores</li>
             <li>512 MB of memory</li>
+            <li>No terminal</li>
         </ul>
         <p>For sites that need more than the bare minimum functionality and interactivity. Good for sites that need to run heavy JavaScript code.</p>
-        <br>
+        <hr>
 
         <p>$4.99/Year</p>
-        <br>
 
         <div id="standard_div"></div>
     </div>
-    <div class="column">
+    <div class="column box mx-2 content">
         <h2>Pro</h2>
         <ul>
             <li>4 Cores</li>
@@ -50,102 +41,15 @@
             <li>Access to Bash terminal</li>
         </ul>
         <p>If you have a heavy-duty site and need full control over the server, this is the plan for you.</p>
-        <br>
+        <hr>
 
         <p>$99.99/Year</p>
-        <br>
 
         <div id="pro_div"></div>
     </div>
 </div>
 
+<a href="{{ url_for('dashboard') }}" class="button">Back to Dashboard</a>
+
 <input id="siteID" type="hidden" value={{site.id}}>
 <input id="sitePlan" type="hidden" value={{site.plan}}>
-
-<script>
-    const planNames = ["Basic", "Standard", "Pro"];
-
-    window.addEventListener("DOMContentLoaded", async () => {
-        const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
-        setupPage(sitePlan);
-    });
-
-    function setupPage(sitePlan) {
-        const currentPlanHeading = document.getElementById("current_plan_heading");
-        currentPlanHeading.innerText = `Current Plan: ${planNames[sitePlan-1]}`;
-
-        // Fill the plan divs
-        const basicDiv = document.getElementById("basic_div");
-        basicDiv.innerHTML = "";
-        if (sitePlan == 1) {
-            const txt = document.createElement("p");
-            txt.innerText = "~ Current Plan ~";
-            basicDiv.appendChild(txt);
-        } else {
-            const btn = document.createElement("button");
-            btn.classList.add("button", "is-primary");
-            btn.innerText = "Select Basic Plan";
-            basicDiv.appendChild(btn);
-            btn.addEventListener("click", doBasicPlan);
-        }
-
-        const standardDiv = document.getElementById("standard_div");
-        standardDiv.innerHTML = "";
-        if (sitePlan == 2) {
-            const txt = document.createElement("p");
-            txt.innerText = "~ Current Plan ~";
-            standardDiv.appendChild(txt);
-        } else {
-            const btn = document.createElement("button");
-            btn.classList.add("button", "is-primary");
-            btn.innerText = "Select Standard Plan";
-            standardDiv.appendChild(btn);
-            btn.addEventListener("click", doStandardPlan);
-        }
-
-        const proDiv = document.getElementById("pro_div");
-        proDiv.innerHTML = "";
-        if (sitePlan == 3) {
-            const txt = document.createElement("p");
-            txt.innerText = "~ Current Plan ~";
-            proDiv.appendChild(txt);
-        } else {
-            const btn = document.createElement("button");
-            btn.classList.add("button", "is-primary");
-            btn.innerText = "Select Pro Plan";
-            proDiv.appendChild(btn);
-            btn.addEventListener("click", doProPlan);
-        }
-    }
-
-    function doBasicPlan() { changePlan(1); }
-    function doStandardPlan() { changePlan(2); }
-    function doProPlan() { changePlan(3); }
-
-    function changePlan(newPlan) {
-        const siteID = Number.parseInt(document.getElementById("siteID").value);
-
-        fetch("/change_plan/" + siteID + "/" + newPlan + '/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        })
-        .then(response => {
-            //check if the request was successful (status code 2xx)
-            if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            //if the response is ok, refresh the page contents
-            console.log(`Set site ${siteID} to plan ${newPlan}`);
-            setupPage(newPlan);
-        })
-        .catch(error => {
-            //handle errors during the fetch
-            console.error('Fetch error:', error);
-        });
-    }
-
-</script>
-
-{% endblock %}
