@@ -240,7 +240,7 @@ async function delete_site(id){
 //functions for rendering the user's sites table
 
 async function fetch_shared_sites(){
-    const user_websites_tbody = document.getElementById('shared_websites_tbody')
+    const user_websites_tbody = document.getElementById('shared_sites_dashboard_container')
     const endpoint = `/shared_sites_data`
     console.log(endpoint)
 
@@ -256,50 +256,84 @@ async function fetch_shared_sites(){
     //clear current children, and add loader
     user_websites_tbody.innerHTML = ""  //clear all children
 
+    if (websites.length == 0){
+        user_websites_tbody.innerHTML = "<p>Nobody has shared a site with you.</p>"
+    }
+
     //insert data into table
     websites.map((website)=>{
-        //create row
-        const tr = document.createElement('tr')
-        
+        //create card
+        const card = document.createElement('div')
+        card.classList.add('box')
+        card.classList.add('p-2')
+        card.classList.add('column')
+        card.classList.add('is-one-quarter')
+        card.classList.add('m-1')
+        card.classList.add('has-shadow')
+        card.classList.add('min-height-300')
+        card.classList.add('is-flex')
+        card.classList.add('is-flex-direction-column')
+        card.classList.add('is-justify-content-space-between')
+
         //add site name col
-        const site_name = document.createElement('td')
-        site_name.innerText = website.name
-        tr.appendChild(site_name)
+        const site_name = document.createElement('h5')
+        site_name.innerText = website.name_lbl
+        site_name.classList.add('is-size-4')
+        card.appendChild(site_name)
 
-        //add site id col
-        const site_id = document.createElement('td')
-        site_id.innerText = website.id
-        tr.appendChild(site_id)
+        //add hr
+        //card.appendChild(document.createElement('hr'))
 
-        //add image col
-        const site_image = document.createElement('td')
-        site_image.innerText = website.image
-        tr.appendChild(site_image)
+        //add card body
+        const site_desc = document.createElement('p')
+        site_desc.innerText = website.desc_lbl
+        site_desc.classList.add('p-1')
+        card.appendChild(site_desc)
 
-        //add visit link col
-        const site_visit = document.createElement('td')
-        const site_link = document.createElement('a')
-        site_link.innerText = "Visit"
-        //site_link.target = "_blank" //open in new tab
-        site_link.href = "http://" + website.hostname
-        site_visit.append(site_link)
-        tr.appendChild(site_visit)
 
-        //Add file upload link col
-        const site_upload = document.createElement('td')
-        const upload_link = document.createElement('a')
-        upload_link.innerText = "Upload"
-        upload_link.href = "/upload_files/" + website.id + "/"
-        site_upload.append(upload_link)
-        tr.appendChild(site_upload)
+        //add action buttons
+        const card_actions = document.createElement('div')
+        card_actions.classList.add('is-flex')
+        card_actions.classList.add('is-flex-row')
+        card_actions.classList.add('is-justify-content-flex-end')
+        card_actions.classList.add('is-align-items-center')
+        card.appendChild(card_actions)
 
-        //add owner col
-        const site_owner = document.createElement('td')
-        site_owner.innerText = website.owner_name
-        tr.appendChild(site_owner)
+        //add visit link
+        const visit_link = document.createElement('a')
+        const visit_icon = document.createElement('i')
+        visit_icon.classList.add('fa-eye')
+        visit_icon.classList.add('fa-solid')
+        visit_icon.classList.add('link_btn')
+        visit_link.appendChild(visit_icon)
+        visit_link.classList.add('ml-2')
+        visit_link.href = "http://" + website.hostname
+        visit_link.target = "_blank"
+        card_actions.appendChild(visit_link)
+
+        //Add file upload link
+        const upload_icon = document.createElement('i')
+        upload_icon.classList.add('fa-upload')
+        upload_icon.classList.add('fa-solid')
+        upload_icon.classList.add('link_btn')
+        upload_icon.classList.add('ml-2')
+        upload_icon.dataset.site_id = website.id
+        upload_icon.addEventListener('click', fetch_upload_form)
+        card_actions.appendChild(upload_icon)
+
+        //add terminal link
+        const terminal_link = document.createElement('a')
+        const terminal_icon = document.createElement('i')
+        terminal_icon.classList.add('fa-terminal')
+        terminal_icon.classList.add('fa-solid')
+        terminal_icon.classList.add('link_btn')
+        terminal_link.appendChild(terminal_icon)
+        terminal_link.classList.add('ml-2')
+        terminal_link.href = `/terminal/${website.id}/`
+        card_actions.appendChild(terminal_link)
 
         //add tr to body
-        user_websites_tbody.appendChild(tr)
+        user_websites_tbody.appendChild(card)
     })
 }
 
