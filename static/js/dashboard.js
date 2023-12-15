@@ -173,15 +173,17 @@ async function fetch_user_sites(){
         card_actions.appendChild(share_icon)
 
         //Add plan link
-        const plan_link = document.createElement('a')
         const plan_icon = document.createElement('i')
         plan_icon.classList.add('fa-dollar-sign')
         plan_icon.classList.add('fa-solid')
         plan_icon.classList.add('link_btn')
-        plan_link.appendChild(plan_icon)
-        plan_link.classList.add('ml-2')
-        plan_link.href = `/plan/${website.id}/`
-        card_actions.appendChild(plan_link)
+        plan_icon.classList.add('ml-2')
+        plan_icon.dataset.site_id = website.id
+        plan_icon.addEventListener('click', async (event) => {
+            await fetch_plan_site_form(event)
+            initialPlanSetup()
+        })
+        card_actions.appendChild(plan_icon)
 
         //add the delete button
         //onst del_btn = document.createElement('button')
@@ -344,3 +346,119 @@ async function fetch_share_site_form(event){
 
 }
 //end functions for showing the share site access form in website body
+
+async function fetch_plan_site_form(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/plan/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+    console.log("done")
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+
+}
+
+/* PLAN SELECTION */
+
+const planNames = ["Basic", "Standard", "Pro"];
+
+function initialPlanSetup() {
+    const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
+    setupPage(sitePlan);
+}
+
+// window.addEventListener("DOMContentLoaded", async () => {
+//     const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
+//     setupPage(sitePlan);
+// });
+
+function setupPage(sitePlan) {
+    const currentPlanHeading = document.getElementById("current_plan_heading");
+    currentPlanHeading.innerText = `Current Plan: ${planNames[sitePlan-1]}`;
+
+    // Fill the plan divs
+    const basicDiv = document.getElementById("basic_div");
+    basicDiv.innerHTML = "";
+    if (sitePlan == 1) {
+        const btn = document.createElement("button");
+        btn.classList.add("button");
+        btn.innerText = "Selected";
+        btn.disabled = true
+        basicDiv.appendChild(btn);
+    } else {
+        const btn = document.createElement("button");
+        btn.classList.add("button", "is-link");
+        btn.innerText = "Select Basic Plan";
+        basicDiv.appendChild(btn);
+        btn.addEventListener("click", doBasicPlan);
+    }
+
+    const standardDiv = document.getElementById("standard_div");
+    standardDiv.innerHTML = "";
+    if (sitePlan == 2) {
+        const btn = document.createElement("button");
+        btn.classList.add("button");
+        btn.innerText = "Selected";
+        btn.disabled = true
+        standardDiv.appendChild(btn);
+    } else {
+        const btn = document.createElement("button");
+        btn.classList.add("button", "is-link");
+        btn.innerText = "Select Standard Plan";
+        standardDiv.appendChild(btn);
+        btn.addEventListener("click", doStandardPlan);
+    }
+
+    const proDiv = document.getElementById("pro_div");
+    proDiv.innerHTML = "";
+    if (sitePlan == 3) {
+        const btn = document.createElement("button");
+        btn.classList.add("button");
+        btn.innerText = "Selected";
+        btn.disabled = true
+        proDiv.appendChild(btn);
+    } else {
+        const btn = document.createElement("button");
+        btn.classList.add("button", "is-link");
+        btn.innerText = "Select Pro Plan";
+        proDiv.appendChild(btn);
+        btn.addEventListener("click", doProPlan);
+    }
+}
+
+function doBasicPlan() { changePlan(1); }
+function doStandardPlan() { changePlan(2); }
+function doProPlan() { changePlan(3); }
+
+function changePlan(newPlan) {
+    const siteID = Number.parseInt(document.getElementById("siteID").value);
+
+    fetch("/change_plan/" + siteID + "/" + newPlan + '/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    })
+    .then(response => {
+        //check if the request was successful (status code 2xx)
+        if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        //if the response is ok, refresh the page contents
+        console.log(`Set site ${siteID} to plan ${newPlan}`);
+        setupPage(newPlan);
+    })
+    .catch(error => {
+        //handle errors during the fetch
+        console.error('Fetch error:', error);
+    });
+}
