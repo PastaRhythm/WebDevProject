@@ -138,7 +138,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
 #from database_manager import User, Website, db, seed_db
-from forms.loginForms import RegisterForm, LoginForm
+from forms.loginForms import RegisterForm, LoginForm, ChangeInfoForm
 from forms.siteForms import NewSiteForm, UploadFilesForm, ShareSiteForm
 from docker_functions.docker_site_funcs import *
 
@@ -396,6 +396,12 @@ def handle_share_site_route(site_id: int):
 		# Get the ID
 		other_id = form.other_id.data
 
+		try:
+			other_id = int(other_id)
+		except:
+			flash(f"When sharing, you must enter a number for the user's ID.")
+			return redirect(url_for('dashboard', site_id=site_id))
+
 		# Get the target user
 		target_user = User.query.get(other_id)
 
@@ -406,7 +412,9 @@ def handle_share_site_route(site_id: int):
 		
 		# Make sure the site isn't already shared with target user
 		current_targets = site.shared_with
+		print(current_targets)
 		for ct in current_targets:
+			print(f"{ct.user_id} - {other_id}")
 			if ct.user_id == other_id:
 				flash(f"You have already shared the site with {other_id}")
 				return redirect(url_for('dashboard', site_id=site_id))
@@ -469,6 +477,41 @@ def handle_change_plan(site_id: int, plan: int):
 def show_sites():
 	return render_template('sites.html', form = NewSiteForm())
 
+@app.get('/account_details/')
+def show_account_details():
+	return render_template('account_details_page.html', form=ChangeInfoForm())
+
+@app.post("/account_details/")
+def handle_change_account_details():
+	user = User.query.get(current_user.id)
+
+	form = ChangeInfoForm()
+	if form.validate():
+		if not user.verify_password(form.current_password.data):
+			flash(f"Current password incorrect. Did not update information.")
+			return redirect(url_for("dashboard"))
+		
+		if (form.fname.data != None and form.fname.data != ""):
+			user.fname = form.fname.data
+		
+		if (form.lname.data != None and form.lname.data != ""):
+			user.lname = form.lname.data
+
+		if (form.email.data != None and form.email.data != ""):
+			user.email = form.email.data
+
+		if (form.new_password.data != None and form.new_password.data != ""):
+			user.password = form.new_password.data
+
+		db.session.commit()
+
+		return redirect(url_for("dashboard"))
+	else: # if the form was invalid
+		# flash error messages and redirect to get form again
+		for field, error in form.errors.items():
+			flash(f"{field}: {error}")
+		return redirect(url_for("dashboard"))
+
 @app.get('/sites_data/')
 def sites_json():
 	#get current user
@@ -491,10 +534,21 @@ def sites_json():
 	#return the json string
 	return json_data
 
-#routes for showing details about a user's sites
 @app.get('/shared-sites/')
 def show_shared_sites():
 	return render_template('shared_sites.html')
+
+@app.get('/user_info/')
+def user_info_json():
+	user = User.query.get(current_user.id)
+
+	json_data = json.dumps({
+		"fname": user.fname,
+		"lname": user.lname,
+		"email": user.email
+	})
+
+	return json_data
 
 @app.get('/shared_sites_data/')
 def shared_sites_json():
