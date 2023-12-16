@@ -172,7 +172,10 @@ async function fetch_user_sites(){
         share_icon.classList.add('link_btn')
         share_icon.classList.add('ml-2')
         share_icon.dataset.site_id = website.id
-        share_icon.addEventListener('click', fetch_share_site_form)
+        share_icon.addEventListener('click', async (event) => {
+            await fetch_share_site_form(event)
+            fill_shared_with_table()
+        })
         card_actions.appendChild(share_icon)
 
         //Add plan link
@@ -397,7 +400,92 @@ async function fetch_share_site_form(event){
     dashboard_body.innerHTML = body_content
 
 }
+
+async function fill_shared_with_table() {
+    const site_id = document.getElementById('siteID').value
+
+    const shared_body = document.getElementById('shared_body')
+    const endpoint = `/shared_users_data/${site_id}/`
+    console.log(endpoint)
+
+    //add loader
+    shared_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const users = await validateJSON(response)
+    console.log(users)
+    console.log("done")
+
+    //clear current children, and add loader
+    shared_body.innerHTML = ""  //clear all children
+
+    //insert data into table
+    users.map((user)=>{
+        //create row
+        const tr = document.createElement('tr')
+        
+        //add ID col
+        const user_id = document.createElement('td')
+        user_id.innerText = user.id
+        tr.appendChild(user_id)
+
+        //add name col
+        const user_name = document.createElement('td')
+        user_name.innerText = user.name
+        tr.appendChild(user_name)
+
+        //add email col
+        const user_email = document.createElement('td')
+        user_email.innerText = user.email
+        tr.appendChild(user_email)
+
+        //add the delete button
+        const del_btn = document.createElement('i')
+        del_btn.addEventListener('click', (event)=>{
+            unshare_site(site_id, user.id)
+        })
+        del_btn.classList.add('fa-solid', 'fa-trash', 'link_btn')
+        tr.appendChild(del_btn)
+
+        //add tr to body
+        shared_body.appendChild(tr)
+    })
+}
+
+async function unshare_site(site_id, user_id) {
+    console.log('Unsharing site')
+
+    //create and add loader
+    const shared_body = document.getElementById('shared_body')
+    shared_body.innerHTML = ""
+    shared_body.appendChild(create_loader())
+
+    //delete record and get results
+    fetch(`/unshare_site/${site_id}/${user_id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        //body: JSON.stringify(dataToSend),
+    })
+        .then(response => {
+            //check if the request was successful (status code 2xx)
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            //if the response is ok, refresh the table
+            console.log('refreshing table')
+            fill_shared_with_table()
+        })
+        .catch(error => {
+            //handle errors during the fetch
+            console.error('Fetch error:', error);
+        });
+}
+
 //end functions for showing the share site access form in website body
+/* PLAN SELECTION */
 
 async function fetch_plan_site_form(event){
     const dashboard_body = document.getElementById('dashboard_body')
@@ -419,19 +507,12 @@ async function fetch_plan_site_form(event){
 
 }
 
-/* PLAN SELECTION */
-
 const planNames = ["Basic", "Standard", "Pro"];
 
 function initialPlanSetup() {
     const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
     setupPage(sitePlan);
 }
-
-// window.addEventListener("DOMContentLoaded", async () => {
-//     const sitePlan = Number.parseInt(document.getElementById("sitePlan").value);
-//     setupPage(sitePlan);
-// });
 
 function setupPage(sitePlan) {
     const currentPlanHeading = document.getElementById("current_plan_heading");
