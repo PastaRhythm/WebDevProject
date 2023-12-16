@@ -477,6 +477,10 @@ def handle_change_plan(site_id: int, plan: int):
 def show_sites():
 	return render_template('sites.html', form = NewSiteForm())
 
+@app.get('/account_details/')
+def show_account_details():
+	return render_template('account_details_page.html')
+
 @app.get('/sites_data/')
 def sites_json():
 	#get current user
@@ -499,10 +503,21 @@ def sites_json():
 	#return the json string
 	return json_data
 
-#routes for showing details about a user's sites
 @app.get('/shared-sites/')
 def show_shared_sites():
 	return render_template('shared_sites.html')
+
+@app.get('/user_info/')
+def user_info_json():
+	user = User.query.get(current_user.id)
+
+	json_data = json.dumps({
+		"fname": user.fname,
+		"lname": user.lname,
+		"email": user.email
+	})
+
+	return json_data
 
 @app.get('/shared_sites_data/')
 def shared_sites_json():

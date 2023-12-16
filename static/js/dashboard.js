@@ -63,6 +63,9 @@ async function populate_dashboard_body(clicked_tab){
     } else if (clicked_tab.id == "dashboard_shared_sites_tab"){
         console.log("execute scripts for shared sites tab")
         fetch_shared_sites()
+    } else if (clicked_tab.id == "dashboard_account_details_tab") {
+        console.log("execute scripts for account details tab")
+        fetch_account_details()
     }
 
 }
@@ -485,7 +488,7 @@ async function unshare_site(site_id, user_id) {
 }
 
 //end functions for showing the share site access form in website body
-/* PLAN SELECTION */
+//functions for changing plans
 
 async function fetch_plan_site_form(event){
     const dashboard_body = document.getElementById('dashboard_body')
@@ -594,4 +597,21 @@ function changePlan(newPlan) {
         //handle errors during the fetch
         console.error('Fetch error:', error);
     });
+}
+
+//end functions for changing plans
+//functions for account details page
+
+async function fetch_account_details() {
+    const endpoint = `/user_info`;
+
+    const response = await fetch(endpoint);
+    const user = await validateJSON(response);
+
+    const fname_p = document.getElementById("fname_p");
+    fname_p.innerText = `First Name: ${user.fname}`;
+    const lname_p = document.getElementById("lname_p");
+    lname_p.innerText = `Last Name: ${user.lname}`;
+    const email_p = document.getElementById("email_p");
+    email_p.innerText = `Email: ${user.email}`;
 }

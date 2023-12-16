@@ -18,3 +18,6 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password: ", 
         validators=[InputRequired(), Length(min=8, max=256)])
     submit = SubmitField("Login")
+
+class ChangeInfoForm(FlaskForm):
+    pass
