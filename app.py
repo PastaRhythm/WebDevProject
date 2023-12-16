@@ -553,19 +553,38 @@ def shared_users_json(site_id: int):
 def get_ssh_client():
 	'''gets the user's ssh client, or creates it if it doesn't exist'''
 	if 'ssh_client' not in session:
+		print("creating new ssh client!")
 		session['ssh_client'] = paramiko.SSHClient()
 		session['ssh_client'].set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
+		try:
+			session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
+		except paramiko.ssh_exception.AuthenticationException:
+			print("SSH authentication failed.")
+			#close connection
+			if isinstance(session['ssh_client'], paramiko.SSHClient):
+				session['ssh_client'].close()
+			
+			#do not continue in the function call
+			raise
+	print(session['ssh_client'])
 	return session['ssh_client']
 
 #handle socketio connection
 @socketio.on('connect')
 def handle_io_terminal_connect(data):
 	print("New connection received!")
-	ssh = get_ssh_client()
-	_stdin, _stdout,_stderr = ssh.exec_command('ls')
-	print(_stdout.read().decode())
-	print(f"ssh {ssh}")
+	try:
+		ssh = get_ssh_client()
+		print(f"ssh {ssh}")
+	except paramiko.ssh_exception.AuthenticationException:
+		#notify client of failure
+		emit("auth_failure", {
+			'stdout': "",
+			'stderr': "Authentication failed!\n"
+		})
+
+		
+			
 
 #handle socketio disconnection
 @socketio.on('disconnect')
@@ -580,21 +599,32 @@ def handle_io_terminal_disconnect():
 def handle_io_terminal_command(data):
 	print(f"Command received: {data.get('command')}")
 
-	#get ssh client
-	ssh = get_ssh_client()
+	
+	try:
+		#get ssh client
+		ssh = get_ssh_client()
+	
 
+		#TODO: THERE IS SOME BUG BELOW, THAT IS WHY I JUST CATCH EXCEPTION FOR NOW!
+		#send the command, and get results
+		if isinstance(ssh, paramiko.SSHClient):
+			_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
+			out = _stdout.read().decode()
+			err = _stderr.read().decode()
 
-	#send the command, and get results
-	_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
-	out = _stdout.read().decode()
-	err = _stderr.read().decode()
-
-	#return the output
-	emit("command", {
-		'stdout': out,
-		'stderr': err
-	})
+			#return the output
+			emit("command", {
+				'stdout': out,
+				'stderr': err
+			})
+	except Exception:
+		#notify client of failure
+		print("an error occurred!")
+		emit("auth_failure", {
+			'stdout': "",
+			'stderr': "Authentication failed!\n"
+		})
 
 if __name__ == '__main__':
-	seed_db(app)
+	#seed_db(app)
 	app.run()
