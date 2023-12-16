@@ -4,23 +4,37 @@
         <h2 class="mb-5 is-size-4">Account Details</h2>
     </div>
 
-    <p>Enter your current password to be able to edit information:</p>
+    <form method="POST" action="{{ url_for('handle_change_account_details') }}">
+        {{ form.hidden_tag() }}
 
-    <hr>
+        <p>Enter your current password to be able to edit information:</p>
+        {{form.current_password()}}
 
-    <h2 class="mb-5 is-size-5">Identifying Information</h2>
+        <hr>
 
-    <p id="fname_p">First Name: -</p>
+        <h2 class="mb-5 is-size-5">Name</h2>
 
-    <p id="lname_p">Last Name: -</p>
+        <p id="fname_p">First Name: -</p>
+        {{form.fname()}}
 
-    <p id="email_p">Email: -</p>
+        <p id="lname_p">Last Name: -</p>
+        {{form.lname()}}
 
-    <hr>
+        <hr>
 
-    <h2 class="mb-5 is-size-5">Change Password</h2>
+        <h2 class="mb-5 is-size-5">Login Credentials</h2>
 
-    <p id="new_pass_p">New Password</p>
+        <p id="email_p">Email: -</p>
+        {{form.email()}}
 
-    <p id="rep_new_pass_p">Repeat New Password</p>
+        <p id="new_pass_p">New Password</p>
+        {{form.new_password()}}
+
+        <p id="rep_new_pass_p">Repeat New Password</p>
+        {{form.confirm_password()}}
+
+        <hr>
+
+        {{form.submit()}}
+    </form>
 </div>

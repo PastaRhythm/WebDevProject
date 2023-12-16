@@ -138,7 +138,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Import from various files
 #from database_manager import User, Website, db, seed_db
-from forms.loginForms import RegisterForm, LoginForm
+from forms.loginForms import RegisterForm, LoginForm, ChangeInfoForm
 from forms.siteForms import NewSiteForm, UploadFilesForm, ShareSiteForm
 from docker_functions.docker_site_funcs import *
 
@@ -479,7 +479,38 @@ def show_sites():
 
 @app.get('/account_details/')
 def show_account_details():
-	return render_template('account_details_page.html')
+	return render_template('account_details_page.html', form=ChangeInfoForm())
+
+@app.post("/account_details/")
+def handle_change_account_details():
+	user = User.query.get(current_user.id)
+
+	form = ChangeInfoForm()
+	if form.validate():
+		if not user.verify_password(form.current_password.data):
+			flash(f"Current password incorrect. Did not update information.")
+			return redirect(url_for("dashboard"))
+		
+		if (form.fname.data != None and form.fname.data != ""):
+			user.fname = form.fname.data
+		
+		if (form.lname.data != None and form.lname.data != ""):
+			user.lname = form.lname.data
+
+		if (form.email.data != None and form.email.data != ""):
+			user.email = form.email.data
+
+		if (form.new_password.data != None and form.new_password.data != ""):
+			user.password = form.new_password.data
+
+		db.session.commit()
+
+		return redirect(url_for("dashboard"))
+	else: # if the form was invalid
+		# flash error messages and redirect to get form again
+		for field, error in form.errors.items():
+			flash(f"{field}: {error}")
+		return redirect(url_for("dashboard"))
 
 @app.get('/sites_data/')
 def sites_json():
