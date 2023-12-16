@@ -7,9 +7,9 @@
     <br>
     
     <div class="field is-flex is-justify-content-center is-align-items-center">
-        <div class="file is-boxed">
+        <div id="file_upload_field" class="file is-boxed has-name">
             <label class="file-label">
-                {{form.zip_file(class="file-input", type="file")}}
+                {{form.zip_file(class="file-input", type="file", id="file_upload_input")}}
                 <span class="file-cta">
                     <span class="file-icon">
                         <i class="fas fa-upload"></i>
@@ -17,6 +17,9 @@
                     <span class="file-label">
                         Upload a zip file…
                     </span>
+                </span>
+                <span id="uploaded_file_name" class="file-name">
+                    No file selected
                 </span>
             </label>
         </div>

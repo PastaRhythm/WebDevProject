@@ -147,7 +147,10 @@ async function fetch_user_sites(){
         upload_icon.classList.add('link_btn')
         upload_icon.classList.add('ml-2')
         upload_icon.dataset.site_id = website.id
-        upload_icon.addEventListener('click', fetch_upload_form)
+        upload_icon.addEventListener('click', async (event) => {
+            await fetch_upload_form(event)
+            update_uploaded_file_name()
+        })
         card_actions.appendChild(upload_icon)
 
         //add terminal link
@@ -318,7 +321,10 @@ async function fetch_shared_sites(){
         upload_icon.classList.add('link_btn')
         upload_icon.classList.add('ml-2')
         upload_icon.dataset.site_id = website.id
-        upload_icon.addEventListener('click', fetch_upload_form)
+        upload_icon.addEventListener('click', async (event) => {
+            await fetch_upload_form(event)
+            update_uploaded_file_name()
+        })
         card_actions.appendChild(upload_icon)
 
         //add terminal link
@@ -358,6 +364,18 @@ async function fetch_upload_form(event){
     dashboard_body.innerHTML = body_content
 
 }
+
+function update_uploaded_file_name() {
+    const fileInput = document.getElementById("file_upload_input");
+    fileInput.onchange = () => {
+        if (fileInput.files.length > 0) {
+            const fileName = document.getElementById("uploaded_file_name");
+            fileName.innerText = fileInput.files[0].name;
+        }
+    }
+    console.log("Ready for upload");
+}
+
 //end functions for showing the upload files to website body
 //functions for showing the share site access form in website body
 async function fetch_share_site_form(event){
