@@ -254,10 +254,14 @@ def new_site():
 def handle_new_site():
 	form = NewSiteForm()
 	if form.validate():
-		success = create_site(current_user, form)
+		try:
+			success = create_site(current_user, form)
+		except docker.errors.APIError:
+			flash("Cannot create another site for you right now, please report this and try again later!")
+			return redirect(url_for('dashboard'))
 		if (success):
 			# TODO: Have some nicer confirmation after creation
-			return redirect(url_for('show_sites'))
+			return redirect(url_for('dashboard'))
 		else:
 			flash("Site could not be created")
 			return redirect(url_for('new_site'))
@@ -626,5 +630,5 @@ def handle_io_terminal_command(data):
 		})
 
 if __name__ == '__main__':
-	#seed_db(app)
+	seed_db(app)
 	app.run()

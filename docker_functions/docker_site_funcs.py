@@ -2,6 +2,8 @@ from fileinput import filename
 import docker
 import os
 import shutil
+import string
+import random
 from database_manager import Website, PermissionLink
 
 from app import db
@@ -18,7 +20,8 @@ def create_site(user, form_data, model=None):
         name_lbl = form_data.name_lbl.data,
         desc_lbl = form_data.desc_lbl.data,
         user=user,
-        plan=1
+        plan=1,
+        ssh_key = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
     )
 
     #check if model was passed in
