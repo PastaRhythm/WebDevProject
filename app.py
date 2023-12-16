@@ -22,6 +22,10 @@ import json
 from constants import TRAEFIK_CONTAINER_NAME
 from database_manager import User, Website, db, seed_db
 
+#socketio and paramiko for in-browser terminal
+from flask_socketio import SocketIO, emit
+import paramiko
+
 #traefik router class
 class TraefikApp(Flask):
 	def __init__(self, *args, **kwargs):
@@ -131,6 +135,7 @@ class TraefikApp(Flask):
 
 # configure this web application
 app = TraefikApp(__name__)
+socketio = SocketIO(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
@@ -543,6 +548,52 @@ def shared_users_json(site_id: int):
 
 	#return the json string
 	return json_data
+
+#in-browser terminal implementation
+def get_ssh_client():
+	'''gets the user's ssh client, or creates it if it doesn't exist'''
+	if 'ssh_client' not in session:
+		session['ssh_client'] = paramiko.SSHClient()
+		session['ssh_client'].set_missing_host_key_policy(paramiko.AutoAddPolicy())
+		session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
+	return session['ssh_client']
+
+#handle socketio connection
+@socketio.on('connect')
+def handle_io_terminal_connect(data):
+	print("New connection received!")
+	ssh = get_ssh_client()
+	_stdin, _stdout,_stderr = ssh.exec_command('ls')
+	print(_stdout.read().decode())
+	print(f"ssh {ssh}")
+
+#handle socketio disconnection
+@socketio.on('disconnect')
+def handle_io_terminal_disconnect():
+	print("Connection lost!")
+	ssh = get_ssh_client()
+	ssh.close()
+	print(f"ssh {ssh}")
+
+#handle command received
+@socketio.on("command")
+def handle_io_terminal_command(data):
+	print(f"Command received: {data.get('command')}")
+
+	#get ssh client
+	ssh = get_ssh_client()
+
+
+	#send the command, and get results
+	_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
+	out = _stdout.read().decode()
+	err = _stderr.read().decode()
+
+	#return the output
+	emit("command", {
+		'stdout': out,
+		'stderr': err
+	})
 
 if __name__ == '__main__':
 	seed_db(app)
