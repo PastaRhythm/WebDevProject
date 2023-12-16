@@ -5,7 +5,7 @@
 <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 <br>
 
-<div id="terminal"></div>
+<div class="mx-6" id="terminal"></div>
 
 
 
@@ -26,7 +26,7 @@
 
     //greet the user
     //term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
-    term.write("Hello from \x1B[1;3;31m{{ site.name_lbl | safe }}\x1B[0m ")
+    term.write("Hello from \x1B[1;3;32m{{ site.name_lbl | safe }}\x1B[0m ")
     term.prompt()
 
     //store terminal contents
