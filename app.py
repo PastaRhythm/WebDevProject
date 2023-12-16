@@ -396,6 +396,12 @@ def handle_share_site_route(site_id: int):
 		# Get the ID
 		other_id = form.other_id.data
 
+		try:
+			other_id = int(other_id)
+		except:
+			flash(f"When sharing, you must enter a number for the user's ID.")
+			return redirect(url_for('dashboard', site_id=site_id))
+
 		# Get the target user
 		target_user = User.query.get(other_id)
 
@@ -406,7 +412,9 @@ def handle_share_site_route(site_id: int):
 		
 		# Make sure the site isn't already shared with target user
 		current_targets = site.shared_with
+		print(current_targets)
 		for ct in current_targets:
+			print(f"{ct.user_id} - {other_id}")
 			if ct.user_id == other_id:
 				flash(f"You have already shared the site with {other_id}")
 				return redirect(url_for('dashboard', site_id=site_id))
