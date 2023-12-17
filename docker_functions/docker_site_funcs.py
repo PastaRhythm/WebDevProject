@@ -49,7 +49,7 @@ def create_site(user, form_data, model=None):
         file.write(f'<h3>Index file for {site.name_lbl}</h3>')
 
     volume_config = {
-        host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
+        host_path: {'bind': f'/var/www/html/', 'mode': 'rw'}
     }
 
 
@@ -61,35 +61,21 @@ def create_site(user, form_data, model=None):
         dockerfile = f'''
 FROM debian:bullseye
 
-#install openssh-server and Apache
 RUN apt-get update && \
-    apt-get install -y apache2 openssh-server && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y apache2
 
-#.create the ssh privilege separation directory
-RUN mkdir -p /var/run/sshd
-
-#configure SSH server
-RUN echo 'root:{site.ssh_key}' | chpasswd 
-RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-#start Apache and SSH
-CMD ["/bin/bash", "-c", "/etc/init.d/apache2 start && /usr/sbin/sshd -D"]
+CMD ["apache2ctl", "-D", "FOREGROUND"]
 '''
         # TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
-        # image = client.images.build(
-        #     fileobj=io.BytesIO(dockerfile.encode('utf-8')),
-        #     rm=True,
-        #     tag='web_hosting_debian_httpd_ssh'
-        # )[0]
+        image = client.images.build(
+            fileobj=io.BytesIO(dockerfile.encode('utf-8')),
+            rm=True,
+            tag='web_hosting_debian'
+        )[0]
 
         #run container
         container = client.containers.run(
-            "httpd:2.4",
+            "web_hosting_debian",
             name=container_name,
             detach=True,
             volumes=volume_config,
