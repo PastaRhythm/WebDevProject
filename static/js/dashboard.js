@@ -614,4 +614,6 @@ async function fetch_account_details() {
     lname_p.innerText = `Last Name: ${user.lname}`;
     const email_p = document.getElementById("email_p");
     email_p.innerText = `Email: ${user.email}`;
+    const billing_p = document.getElementById("billing_p");
+    billing_p.innerText = `${user.billing_address}`;
 }

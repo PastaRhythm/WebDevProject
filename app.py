@@ -497,6 +497,9 @@ def handle_change_account_details():
 		if (form.lname.data != None and form.lname.data != ""):
 			user.lname = form.lname.data
 
+		if (form.billing_address.data != None and form.billing_address.data != ""):
+			user.billing_address = form.billing_address.data
+
 		if (form.email.data != None and form.email.data != ""):
 			user.email = form.email.data
 
@@ -545,7 +548,8 @@ def user_info_json():
 	json_data = json.dumps({
 		"fname": user.fname,
 		"lname": user.lname,
-		"email": user.email
+		"email": user.email,
+		"billing_address": user.billing_address
 	})
 
 	return json_data
