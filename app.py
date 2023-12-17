@@ -53,12 +53,13 @@ class TraefikApp(Flask):
 					"traefik:latest",
 					name = TRAEFIK_CONTAINER_NAME,
 					detach=True,
-					ports={'80/tcp': '80'},
+					ports={'80/tcp': '80'},	#internal : external
 					command = [
 						"--api.insecure=true",
 						"--providers.docker=true",
 						"--providers.docker.exposedbydefault=false",
-						"--entrypoints.web.address=:80"
+						"--entrypoints.web.address=:80",
+						#"--entrypoints.ssh.address=:22"
 					],
 					labels = {
 						'traefik.enable': 'true',
@@ -126,7 +127,7 @@ class TraefikApp(Flask):
 						create_site(website.user, tmp, model=website)
 						#^pass model in to prevent creation of a new model
 					except docker.errors.APIError as e:
-						print(f"Error creating '{container.name}' container: {e}")
+						print(f"Error creating user web container: {e}")
 						#raise   #raise most recently caught exception
 
 				finally:
@@ -256,7 +257,8 @@ def handle_new_site():
 	if form.validate():
 		try:
 			success = create_site(current_user, form)
-		except docker.errors.APIError:
+		except docker.errors.APIError as e:
+			print(e)
 			flash("Cannot create another site for you right now, please report this and try again later!")
 			return redirect(url_for('dashboard'))
 		if (success):
@@ -275,7 +277,7 @@ def handle_new_site():
 @login_required
 def handle_del_site(site_id: int):
 	site = Website.query.get(site_id)
-	if site.user_id != current_user.id:
+	if site == None or site.user_id != current_user.id:
 		flash("You do not have permission to modify this website.")
 		return redirect(url_for("dashboard"))
 	

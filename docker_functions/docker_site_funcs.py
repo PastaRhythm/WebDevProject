@@ -4,6 +4,7 @@ import os
 import shutil
 import string
 import random
+import io
 from database_manager import Website, PermissionLink
 
 from app import db
@@ -28,7 +29,7 @@ def create_site(user, form_data, model=None):
     if model != None:
         site = model
 
-
+    #do this here because I need to get the id of the site
     db.session.add(site)
     db.session.commit()
     container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{site.id}"
@@ -45,10 +46,10 @@ def create_site(user, form_data, model=None):
 
     #create index file
     with open(f"{host_path}/index.html", 'w') as file:
-        file.write(f'<h3>Index file for {container_name}</h3>')
+        file.write(f'<h3>Index file for {site.name_lbl}</h3>')
 
     volume_config = {
-        host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
+        host_path: {'bind': f'/var/www/html', 'mode': 'rw'}
     }
 
 
@@ -56,16 +57,51 @@ def create_site(user, form_data, model=None):
     client = docker.from_env()
 
     try:
+        #build the image
+        dockerfile = f'''
+FROM debian:bullseye
+
+# Install openssh-server and Apache
+RUN apt-get update && \
+    apt-get install -y apache2 openssh-server && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create the privilege separation directory
+RUN mkdir -p /var/run/sshd
+
+# Configure SSH server
+RUN echo 'root:{site.ssh_key}' | chpasswd 
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+# Start Apache and SSH
+CMD ["/bin/bash", "-c", "/etc/init.d/apache2 start && /usr/sbin/sshd -D"]
+'''
+
+        image = client.images.build(
+            fileobj=io.BytesIO(dockerfile.encode('utf-8')),
+            rm=True,
+            tag='web_hosting_debian_httpd_ssh'
+        )[0]
+
         #run container
         container = client.containers.run(
-            "httpd:2.4",
+            image, #"debian_http_ssh",
             name = container_name,
             detach=True,
             volumes = volume_config,
+            ports={'22/tcp': '2022'},   #internal : external
             labels = {
                 'traefik.enable': 'true',
-                f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',
-                f'traefik.http.routers.{container_name}.entrypoints': 'web',
+                f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',  
+                f'traefik.http.routers.{container_name}.entrypoints': 'web',                            
+                f"traefik.http.services.{container_name}.loadbalancer.server.port": "80"
+                # "traefik.tcp.routers.ssh.rule": "=HostSNI(`*`)",
+                # "traefik.tcp.routers.ssh.entrypoints": "ssh",
+                # "traefik.tcp.routers.ssh.tls": "false"
             },
         )  #remove ports later
 
@@ -75,6 +111,11 @@ def create_site(user, form_data, model=None):
 
     except docker.errors.APIError as e:
         print(f"Error with compose.create: {e}")
+
+        #delete the model stub instance, if the container was not created
+        db.session.delete(site)
+        db.session.commit()
+
         raise   #raise most recently caught exception
     finally:
         client.close()
