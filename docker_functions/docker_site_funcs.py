@@ -137,7 +137,8 @@ def delete_site(site):
 
 def update_site_plan(site: Website, newPlan: int):
     planIndex = newPlan-1
-    cores = ["0", "0-1", "0-3"]
+    # cores = ["0", "0-1", "0-3"]
+    cpu_usage = [100000, 200000, 400000]
     memory = ["128m", "512m", "1g"]
 
     # Edit the attributes of the container
@@ -156,7 +157,8 @@ def update_site_plan(site: Website, newPlan: int):
 
         # container.attrs["HostConfig"]["CpusetCpus"] = cores[newPlan-1]
 
-        container.update(cpuset_cpus = cores[planIndex], mem_limit = memory[planIndex], memswap_limit = memory[planIndex])
+        # container.update(cpuset_cpus = cores[planIndex], mem_limit = memory[planIndex], memswap_limit = memory[planIndex])
+        container.update(cpu_quota = cpu_usage[planIndex], mem_limit = memory[planIndex], memswap_limit = memory[planIndex])
 
         container.reload()
         
@@ -177,6 +179,10 @@ def get_sites_status(sites):
 
     for s in sites:
         try:
+            plan_index = s.plan - 1
+            core_counts = [1, 2, 4]
+            display_core_count = core_counts[plan_index]
+
             container = client.containers.get(s.name)
             stats = container.stats(stream = False)
 
@@ -210,7 +216,7 @@ def get_sites_status(sites):
                 "success": True,
                 "online": cont_status,
                 "cpu": round(cpu_percent, 2),
-                "cores": cpu_count,
+                "cores": display_core_count,
                 "mem": round(mem_mb, 2),
                 "mem_lim": f"{mem_limit} MB"
             })
