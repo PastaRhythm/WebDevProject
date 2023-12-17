@@ -49,7 +49,7 @@ def create_site(user, form_data, model=None):
         file.write(f'<h3>Index file for {site.name_lbl}</h3>')
 
     volume_config = {
-        host_path: {'bind': f'/var/www/html', 'mode': 'rw'}
+        host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
     }
 
 
@@ -61,15 +61,15 @@ def create_site(user, form_data, model=None):
         dockerfile = f'''
 FROM debian:bullseye
 
-# Install openssh-server and Apache
+#install openssh-server and Apache
 RUN apt-get update && \
     apt-get install -y apache2 openssh-server && \
     rm -rf /var/lib/apt/lists/*
 
-# Create the privilege separation directory
+#.create the ssh privilege separation directory
 RUN mkdir -p /var/run/sshd
 
-# Configure SSH server
+#configure SSH server
 RUN echo 'root:{site.ssh_key}' | chpasswd 
 RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
@@ -77,33 +77,41 @@ RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
-# Start Apache and SSH
+#start Apache and SSH
 CMD ["/bin/bash", "-c", "/etc/init.d/apache2 start && /usr/sbin/sshd -D"]
 '''
-
-        image = client.images.build(
-            fileobj=io.BytesIO(dockerfile.encode('utf-8')),
-            rm=True,
-            tag='web_hosting_debian_httpd_ssh'
-        )[0]
+        # TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+        # image = client.images.build(
+        #     fileobj=io.BytesIO(dockerfile.encode('utf-8')),
+        #     rm=True,
+        #     tag='web_hosting_debian_httpd_ssh'
+        # )[0]
 
         #run container
         container = client.containers.run(
-            image, #"debian_http_ssh",
-            name = container_name,
+            "httpd:2.4",
+            name=container_name,
             detach=True,
-            volumes = volume_config,
-            ports={'22/tcp': '2022'},   #internal : external
-            labels = {
+            volumes=volume_config,
+            # ports={'22/tcp': '2022'},   #internal : external
+            labels={
                 'traefik.enable': 'true',
-                f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',  
-                f'traefik.http.routers.{container_name}.entrypoints': 'web',                            
-                f"traefik.http.services.{container_name}.loadbalancer.server.port": "80"
-                # "traefik.tcp.routers.ssh.rule": "=HostSNI(`*`)",
-                # "traefik.tcp.routers.ssh.entrypoints": "ssh",
-                # "traefik.tcp.routers.ssh.tls": "false"
+
+                # HTTP labels
+                f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',
+                f'traefik.http.routers.{container_name}.entrypoints': 'web',
+                f'traefik.http.services.{container_name}.loadbalancer.server.port': '80',
+
+                # TCP labels
+                # TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+                # f'traefik.tcp.routers.{container_name}.entrypoints': 'ssh',
+                # f'traefik.tcp.routers.{container_name}.rule': f'HostSNI(`{form_data.host_name.data}`)',
+                # f'traefic.tcp.routers.{container_name}.tls': 'false',
+                # f'traefik.tcp.services.{container_name}.loadbalancer.server.port': '22',
+                # f"traefik.tcp.routers.{container_name}.service": f"{container_name}@docker"
+
             },
-        )  #remove ports later
+        )  # remove ports later
 
         #save vars needed later
         container_id = container.attrs['Id']

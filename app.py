@@ -50,22 +50,34 @@ class TraefikApp(Flask):
 			print("Creating traefik container!")
 			try:
 				_ = client.containers.run(
-					"traefik:latest",
+					"traefik:v2.6",
 					name = TRAEFIK_CONTAINER_NAME,
 					detach=True,
-					ports={'80/tcp': '80'},	#internal : external
+					ports={
+						'80/tcp': '80',
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME
+						#'22/tcp': '2002'
+					},	#internal : external
 					command = [
 						"--api.insecure=true",
 						"--providers.docker=true",
 						"--providers.docker.exposedbydefault=false",
+
 						"--entrypoints.web.address=:80",
-						#"--entrypoints.ssh.address=:22"
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+						#"--entrypoints.ssh.address=:22"			#INTERNAL
 					],
 					labels = {
 						'traefik.enable': 'true',
-						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
+
+						'traefik.http.routers.traefik.service': 'api@internal',
+						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',	#directs me to traefik dashboard
 						'traefik.http.routers.traefik.entrypoints': 'web',
-						'traefik.http.routers.traefik.service': 'api@internal'
+
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME
+						# f'traefik.tcp.routers.traefik.rule': f'HostSNI(`localhost`)',
+                		# f'traefik.tcp.routers.traefik.entrypoints': 'ssh',
+                		# f'traefik.tcp.services.traefik.loadbalancer.server.port': '22',
 					},
 					volumes = {
 						"/var/run/docker.sock": {'bind': f"/var/run/docker.sock", 'mode': 'rw'}
