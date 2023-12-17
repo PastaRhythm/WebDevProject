@@ -175,12 +175,20 @@ def get_sites_status(sites):
     client = docker.from_env()
     ret = []
 
-    try:
-        for s in sites:
+    for s in sites:
+        try:
             container = client.containers.get(s.name)
             stats = container.stats(stream = False)
 
             # print(json.dumps(container.stats(stream = False), indent = 4))
+            cont_status = container.status
+            if (cont_status != "running"):
+                ret.append({
+                    "id": s.id,
+                    "success": True,
+                    "online": cont_status,
+                })
+                continue
 
             # CPU Usage
             cpu_count = len(stats["cpu_stats"]["cpu_usage"]["percpu_usage"])
@@ -199,13 +207,18 @@ def get_sites_status(sites):
 
             ret.append({
                 "id": s.id,
+                "success": True,
+                "online": cont_status,
                 "cpu": round(cpu_percent, 2),
                 "cores": cpu_count,
                 "mem": round(mem_mb, 2),
                 "mem_lim": f"{mem_limit} MB"
             })
-    except:
-        return None
+        except:
+            ret.append({
+                "id": s.id,
+                "success": False
+            })
 
     return ret
 

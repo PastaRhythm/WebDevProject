@@ -662,7 +662,16 @@ async function update_sites_status() {
 
     for (const stub of data.sites_status) {
         const status_text = document.getElementById(`status_of_${stub.id}`);
-        status_text.innerText = `${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`
+
+        if (stub.success) {
+            if (stub.online == "running") {
+                status_text.innerText = `${stub.online} - ${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`;
+            } else {
+                status_text.innerText = `${stub.online}`;
+            }
+        } else {
+            status_text.innerText = "Couldn't get status";
+        }
     }
 }
 
@@ -680,7 +689,16 @@ async function update_shared_sites_status() {
 
     for (const stub of data.sites_status) {
         const status_text = document.getElementById(`status_of_${stub.id}`);
-        status_text.innerText = `${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`
+        
+        if (stub.success) {
+            if (stub.online == "running") {
+                status_text.innerText = `${stub.online} - ${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`;
+            } else {
+                status_text.innerText = `${stub.online}`;
+            }
+        } else {
+            status_text.innerText = "Couldn't get status";
+        }
     }
 }
 
