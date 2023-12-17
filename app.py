@@ -552,6 +552,25 @@ def sites_status_json():
 			"sites_status": status
 		})
 
+@app.get('/shared_sites_status/')
+def shared_sites_status_json():
+	user = User.query.get(current_user.id)
+	
+	shared = user.shared_with_me
+	sites = []
+	for s in shared:
+		sites.append(s.site)
+
+	status = get_sites_status(sites)
+	
+	if status is None:
+		return json.dumps({"error": True})
+	else:
+		return jsonify({
+			"error": False,
+			"sites_status": status
+		})
+
 @app.get('/shared-sites/')
 def show_shared_sites():
 	return render_template('shared_sites.html')

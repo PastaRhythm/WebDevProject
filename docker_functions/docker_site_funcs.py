@@ -6,6 +6,8 @@ from database_manager import Website, PermissionLink
 
 from app import db
 
+import json
+
 def create_site(user, form_data, model=None):
     '''takes a user and a hostname, and creates a website for them with that hostname pointing to it.  "model" is the model to use if a db model for this site already exists'''
     #0) insert blank record, and create a custom name for the container based on the user's id and container's id
@@ -175,17 +177,32 @@ def get_sites_status(sites):
 
     try:
         for s in sites:
-            planIndex = s.plan - 1
-            cores = ["1", "2", "4"]
-            memory = ["128m", "512m", "1g"]
+            container = client.containers.get(s.name)
+            stats = container.stats(stream = False)
 
-            # TODO: Get the rest of the info
+            # print(json.dumps(container.stats(stream = False), indent = 4))
+
+            # CPU Usage
+            cpu_count = len(stats["cpu_stats"]["cpu_usage"]["percpu_usage"])
+            cpu_percent = 0.0
+            cpu_delta = float(stats["cpu_stats"]["cpu_usage"]["total_usage"]) - \
+                        float(stats["precpu_stats"]["cpu_usage"]["total_usage"])
+            system_delta = float(stats["cpu_stats"]["system_cpu_usage"]) - \
+                        float(stats["precpu_stats"]["system_cpu_usage"])
+            if system_delta > 0.0:
+                cpu_percent = cpu_delta / system_delta * 100.0 * cpu_count
+
+            # Memory Percentage
+            mem_bytes = stats["memory_stats"]["usage"]
+            mem_mb = (mem_bytes / 1024) / 1024
+            mem_limit = (stats["memory_stats"]["limit"] / 1024) / 1024
+
             ret.append({
                 "id": s.id,
-                "cpu": 0,
-                "cores": cores[planIndex],
-                "mem": 0,
-                "mem_lim": memory[planIndex]
+                "cpu": round(cpu_percent, 2),
+                "cores": cpu_count,
+                "mem": round(mem_mb, 2),
+                "mem_lim": f"{mem_limit} MB"
             })
     except:
         return None

@@ -226,8 +226,9 @@ async function fetch_user_sites(){
         user_websites_tbody.appendChild(card)
     })
 
-    //Start interval for updating sit status
-    window.cssuper.intervalID = setInterval(update_sites_status, 5000)
+    //Start interval for updating site status
+    update_sites_status()
+    window.cssuper.intervalID = setInterval(update_sites_status, 10000)
 }
 
 async function delete_site(id){
@@ -315,6 +316,12 @@ async function fetch_shared_sites(){
         site_desc.classList.add('p-1')
         card.appendChild(site_desc)
 
+        //add status text
+        const status_text = document.createElement("div")
+        status_text.classList.add('is-flex', 'is-flex-row', 'is-justify-content-flex-start', 'is-align-items-center', 'has-text-link')
+        status_text.innerText = "Fetching Status..."
+        status_text.id = `status_of_${website.id}`
+        card.appendChild(status_text)
 
         //add action buttons
         const card_actions = document.createElement('div')
@@ -363,6 +370,10 @@ async function fetch_shared_sites(){
         //add tr to body
         user_websites_tbody.appendChild(card)
     })
+
+    //Start interval for updating site status
+    update_shared_sites_status()
+    window.cssuper.intervalID = setInterval(update_shared_sites_status, 10000)
 }
 
 //end functions for rendering the user's sites table
@@ -654,3 +665,23 @@ async function update_sites_status() {
         status_text.innerText = `${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`
     }
 }
+
+async function update_shared_sites_status() {
+    const endpoint = `/shared_sites_status`;
+
+    const response = await fetch(endpoint);
+    const data = await validateJSON(response);
+
+    console.log("Updating status");
+
+    if (data.error) {
+        return;
+    }
+
+    for (const stub of data.sites_status) {
+        const status_text = document.getElementById(`status_of_${stub.id}`);
+        status_text.innerText = `${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`
+    }
+}
+
+//end functions for updating container status
