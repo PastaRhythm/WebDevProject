@@ -23,6 +23,7 @@ class ChangeInfoForm(FlaskForm):
     current_password = PasswordField(validators=[InputRequired(), Length(min=8, max=256)])
     fname = StringField()
     lname = StringField()
+    billing_address = TextAreaField()
     email = EmailField(validators=[Optional(), Email()])
     new_password = PasswordField(validators=[Optional(), Length(min=8, max=256)])
     confirm_password = PasswordField(validators=[EqualTo('new_password')])

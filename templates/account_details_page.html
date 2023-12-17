@@ -4,37 +4,53 @@
         <h2 class="mb-5 is-size-4">Account Details</h2>
     </div>
 
+    <div class="columns">
+    <div class="column is-two-thirds">
+
     <form method="POST" action="{{ url_for('handle_change_account_details') }}">
         {{ form.hidden_tag() }}
 
         <p>Enter your current password to be able to edit information:</p>
-        {{form.current_password()}}
+        {{form.current_password(class="input", type="password", placeholder="Current Password")}}
 
         <hr>
 
-        <h2 class="mb-5 is-size-5">Name</h2>
+        <h2 class="mb-5 is-size-5">Personal Information</h2>
 
         <p id="fname_p">First Name: -</p>
-        {{form.fname()}}
+        {{form.fname(class="input", type="text", placeholder="First Name")}}
 
         <p id="lname_p">Last Name: -</p>
-        {{form.lname()}}
+        {{form.lname(class="input", type="text", placeholder="Last Name")}}
+
+        <p>Billing Address:</p>
+        <div class="card mb-4 mt-2 mr-4 ml-4">
+            <div class="card-content">
+                <div class="content" id="billing_p">
+                    -
+                </div>
+            </div>
+          </div>
+        {{form.billing_address(class="textarea", placeholder="Billing Address")}}
 
         <hr>
 
         <h2 class="mb-5 is-size-5">Login Credentials</h2>
 
         <p id="email_p">Email: -</p>
-        {{form.email()}}
+        {{form.email(class="input", type="email", placeholder="Email")}}
 
         <p id="new_pass_p">New Password</p>
-        {{form.new_password()}}
+        {{form.new_password(class="input", type="password", placeholder="New Password")}}
 
         <p id="rep_new_pass_p">Repeat New Password</p>
-        {{form.confirm_password()}}
+        {{form.confirm_password(class="input", type="password", placeholder="Repeat New Password")}}
 
         <hr>
 
-        {{form.submit()}}
+        {{form.submit(class="button is-link mb-4")}}
     </form>
+
+    </div>
+    </div>
 </div>
