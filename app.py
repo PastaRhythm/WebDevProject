@@ -1,6 +1,6 @@
 from distutils.log import log
 import string
-from flask import Flask
+from flask import Flask, jsonify
 from flask import redirect, url_for, render_template
 from flask import request, session, flash
 from flask_login import LoginManager, login_required
@@ -536,6 +536,21 @@ def sites_json():
 
 	#return the json string
 	return json_data
+
+@app.get('/sites_status/')
+def sites_status_json():
+	user = User.query.get(current_user.id)
+	sites = user.websites
+
+	status = get_sites_status(sites)
+	
+	if status is None:
+		return json.dumps({"error": True})
+	else:
+		return jsonify({
+			"error": False,
+			"sites_status": status
+		})
 
 @app.get('/shared-sites/')
 def show_shared_sites():

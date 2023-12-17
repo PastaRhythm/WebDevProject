@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', (event)=>{
+    window.cssuper = {};
+    window.cssuper.intervalID = 0;
+
     //get buttons
     dashboard_menu_buttons = Array.from(document.querySelectorAll(".dashboard_menu_item"))
 
@@ -9,6 +12,10 @@ document.addEventListener('DOMContentLoaded', (event)=>{
     //map buttons to get their contents
     dashboard_menu_buttons.map((btn)=>{
         btn.addEventListener('click', (event)=>{
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
+
             const clicked_tab = event.target
             change_dashboard_active_tab(clicked_tab, dashboard_menu_buttons)
             populate_dashboard_body(clicked_tab)
@@ -122,6 +129,12 @@ async function fetch_user_sites(){
         site_desc.classList.add('p-1')
         card.appendChild(site_desc)
 
+        //add status text
+        const status_text = document.createElement("div")
+        status_text.classList.add('is-flex', 'is-flex-row', 'is-justify-content-flex-start', 'is-align-items-center', 'has-text-link')
+        status_text.innerText = "Fetching Status..."
+        status_text.id = `status_of_${website.id}`
+        card.appendChild(status_text)
 
         //add action buttons
         const card_actions = document.createElement('div')
@@ -212,6 +225,9 @@ async function fetch_user_sites(){
         //add tr to body
         user_websites_tbody.appendChild(card)
     })
+
+    //Start interval for updating sit status
+    window.cssuper.intervalID = setInterval(update_sites_status, 5000)
 }
 
 async function delete_site(id){
@@ -616,4 +632,25 @@ async function fetch_account_details() {
     email_p.innerText = `Email: ${user.email}`;
     const billing_p = document.getElementById("billing_p");
     billing_p.innerText = `${user.billing_address}`;
+}
+
+//end functions for account details page
+//functions for updating container status
+
+async function update_sites_status() {
+    const endpoint = `/sites_status`;
+
+    const response = await fetch(endpoint);
+    const data = await validateJSON(response);
+
+    console.log("Updating status");
+
+    if (data.error) {
+        return;
+    }
+
+    for (const stub of data.sites_status) {
+        const status_text = document.getElementById(`status_of_${stub.id}`);
+        status_text.innerText = `${stub.cores} core: ${stub.cpu}% - ${stub.mem}/${stub.mem_lim}`
+    }
 }

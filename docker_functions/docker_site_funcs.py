@@ -169,6 +169,29 @@ def update_site_plan(site: Website, newPlan: int):
     site.plan = newPlan
     db.session.commit()
 
+def get_sites_status(sites):
+    client = docker.from_env()
+    ret = []
+
+    try:
+        for s in sites:
+            planIndex = s.plan - 1
+            cores = ["1", "2", "4"]
+            memory = ["128m", "512m", "1g"]
+
+            # TODO: Get the rest of the info
+            ret.append({
+                "id": s.id,
+                "cpu": 0,
+                "cores": cores[planIndex],
+                "mem": 0,
+                "mem_lim": memory[planIndex]
+            })
+    except:
+        return None
+
+    return ret
+
 def share_site(target_user, site):
     # Create an entry for sharing the given site with the given user
     link = PermissionLink(user_id = target_user.id, site_id = site.id)
