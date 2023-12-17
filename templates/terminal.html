@@ -77,6 +77,7 @@
     //create window terminal object
     window.terminal = {}
     window.terminal.socket = io.connect("/");
+    window.terminal.site_id = "{{ site.id }}"
 
     //do this when connection is successful
     window.terminal.socket.on("connect", join)
@@ -100,6 +101,7 @@
     function send_command(command){
         //send message
         window.terminal.socket.emit('command',{
+            'site_id': window.terminal.site_id,
             'command': command,
         })
     }

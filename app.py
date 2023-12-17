@@ -568,38 +568,38 @@ def shared_users_json(site_id: int):
 	return json_data
 
 #in-browser terminal implementation
-def get_ssh_client():
-	'''gets the user's ssh client, or creates it if it doesn't exist'''
-	if 'ssh_client' not in session:
-		print("creating new ssh client!")
-		session['ssh_client'] = paramiko.SSHClient()
-		session['ssh_client'].set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		try:
-			session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
-		except paramiko.ssh_exception.AuthenticationException:
-			print("SSH authentication failed.")
-			#close connection
-			if isinstance(session['ssh_client'], paramiko.SSHClient):
-				session['ssh_client'].close()
+# def get_ssh_client():
+# 	'''gets the user's ssh client, or creates it if it doesn't exist'''
+# 	if 'ssh_client' not in session:
+# 		print("creating new ssh client!")
+# 		session['ssh_client'] = paramiko.SSHClient()
+# 		session['ssh_client'].set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# 		try:
+# 			session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
+# 		except paramiko.ssh_exception.AuthenticationException:
+# 			print("SSH authentication failed.")
+# 			#close connection
+# 			if isinstance(session['ssh_client'], paramiko.SSHClient):
+# 				session['ssh_client'].close()
 			
-			#do not continue in the function call
-			raise
-	print(session['ssh_client'])
-	return session['ssh_client']
+# 			#do not continue in the function call
+# 			raise
+# 	print(session['ssh_client'])
+# 	return session['ssh_client']
 
 #handle socketio connection
 @socketio.on('connect')
 def handle_io_terminal_connect(data):
 	print("New connection received!")
-	try:
-		ssh = get_ssh_client()
-		print(f"ssh {ssh}")
-	except paramiko.ssh_exception.AuthenticationException:
-		#notify client of failure
-		emit("auth_failure", {
-			'stdout': "",
-			'stderr': "Authentication failed!\n"
-		})
+	# try:
+	# 	ssh = get_ssh_client()
+	# 	print(f"ssh {ssh}")
+	# except paramiko.ssh_exception.AuthenticationException:
+	# 	#notify client of failure
+	# 	emit("auth_failure", {
+	# 		'stdout': "",
+	# 		'stderr': "Authentication failed!\n"
+	# 	})
 
 		
 			
@@ -608,9 +608,9 @@ def handle_io_terminal_connect(data):
 @socketio.on('disconnect')
 def handle_io_terminal_disconnect():
 	print("Connection lost!")
-	ssh = get_ssh_client()
-	ssh.close()
-	print(f"ssh {ssh}")
+	# ssh = get_ssh_client()
+	# ssh.close()
+	# print(f"ssh {ssh}")
 
 #handle command received
 @socketio.on("command")
@@ -618,30 +618,69 @@ def handle_io_terminal_command(data):
 	print(f"Command received: {data.get('command')}")
 
 	
-	try:
+	#try:
 		#get ssh client
-		ssh = get_ssh_client()
+		# ssh = get_ssh_client()
 	
 
 		#TODO: THERE IS SOME BUG BELOW, THAT IS WHY I JUST CATCH EXCEPTION FOR NOW!
 		#send the command, and get results
-		if isinstance(ssh, paramiko.SSHClient):
-			_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
-			out = _stdout.read().decode()
-			err = _stderr.read().decode()
+		# if isinstance(ssh, paramiko.SSHClient):
+		# 	_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
+		# 	out = _stdout.read().decode()
+		# 	err = _stderr.read().decode()
+	# except Exception:
+	# 	#notify client of failure
+	# 	print("an error occurred!")
+	# 	emit("auth_failure", {
+	# 		'stdout': "",
+	# 		'stderr': "Authentication failed!\n"
+	# 	})
+	try:
+		#get website
+		website = Website.query.get(data.get('site_id'))
+		#print(f"Website: {website}")
 
-			#return the output
-			emit("command", {
-				'stdout': out,
-				'stderr': err
+		#see if it is shared with the curr user
+		is_shared = False
+		for share in website.shared_with:
+			if share.user == current_user.id:
+				is_shared = True
+				break
+
+		#see if user can run commands
+		if current_user.id == website.user_id or is_shared:
+
+				#get the container
+				client = docker.from_env()
+				container = client.containers.get(website.name)
+
+				#run the command
+				exec_instance = container.exec_run(cmd=data.get('command'), stdout=True, stderr=True, tty=True)
+
+				#get results
+				output = exec_instance.output.decode('utf-8').strip()
+				#error = exec_instance.stderr.decode('utf-8').strip()
+
+				#return the output
+				emit("command", {
+					'stdout': output,
+					'stderr': ""#error
+				})
+		else: 
+			#auth failed if here
+			emit("auth_failure", {
+				'stdout': "",
+				'stderr': "Authentication failed!\n"
 			})
-	except Exception:
-		#notify client of failure
-		print("an error occurred!")
-		emit("auth_failure", {
-			'stdout': "",
-			'stderr': "Authentication failed!\n"
-		})
+	except Exception as e:
+		#something went wrong if here
+		print(f"Command error: {e}")
+		emit("command", {
+				'stdout': "",
+				'stderr': "Command not received by server!\n"
+			})
+	
 
 if __name__ == '__main__':
 	seed_db(app)
