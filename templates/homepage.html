@@ -7,7 +7,7 @@
 <!-- Header -->
 <header class="hero is-link " style="padding:128px 16px">
     <div class="is-link">
-      <h1 class="has-text-centered is-size-1">CSSUPER</h1>
+      <h1 class="has-text-centered is-size-1">CSSuper</h1>
       <p class=" has-text-centered is-size-5">Web Hosting at a great price</p>
       <div class="is-flex is-justify-content-space-around pt-4">
         <button class="button is-primary ">Get Started</button>
@@ -16,8 +16,7 @@
   </header>
   
   <!-- First Grid -->
-  <div class="">
-    <div class="level">
+    <div class="level py-4 px-2">
       <div class="column is-two-thirds is-justify-content-flex-end">
         <h1 class = "is-size-2">Web hosting made <i>simple</i>.</h1>
         <hr>
@@ -27,16 +26,14 @@
       </div>
   
       <div class="column is-one-third image is-104x104">
-        <img src = "/static/images/web_hosting.png">
+        <img src = "{{ url_for('static', filename='/images/web_hosting.png') }}">
       </div>
     </div>
-  </div>
   
   <!-- Second Grid -->
-  <div class="">
-    <div class="level has-background-grey-lighter">
+    <div class="level has-background-grey-lighter py-4 px-2">
       <div class="column is-one-third image is-104x104">
-        <img src = "/static/images/box.png">
+        <img src = "{{ url_for('static', filename='/images/box.png') }}">
       </div>
   
       <div class="column is-two-thirds is-justify-content-flex-end">
@@ -51,7 +48,6 @@
         </div> 
       </div>
     </div>
-  </div>
   
   <footer class="footer has-background-grey has-text-centered">
       <h1 class="is-size-6 has-text-light has-text-centered">By 
