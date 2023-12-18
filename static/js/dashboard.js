@@ -787,18 +787,16 @@ function init_terminal_socketio(event){
         //backspace key
         else if (event.keyCode === 8){
             curr_line = curr_line.slice(0, curr_line.length-1)
-            term.write("\b \b")
+            
         }
         //up arrow key
-        /*
         else if (event.keyCode === 38){
-            const prev_entry = entries.length >= prev_cmd_idx ? entries[entries.length - prev_cmd_idx] : entries[0]
-            prev_cmd_idx += 1
-            term.write(prev_entry)
+            return  //dont let them go back up
         }
         //down arrow key
-        else if (event.keyCode === 40){}
-        */
+        else if (event.keyCode === 40){
+            return  //dont let them go down
+        }
         //other keys
         else {
             curr_line += key
