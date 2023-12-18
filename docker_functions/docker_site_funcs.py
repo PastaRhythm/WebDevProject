@@ -2,6 +2,9 @@ from fileinput import filename
 import docker
 import os
 import shutil
+import string
+import random
+import io
 from database_manager import Website, PermissionLink
 
 from app import db
@@ -20,14 +23,15 @@ def create_site(user, form_data, model=None):
         name_lbl = form_data.name_lbl.data,
         desc_lbl = form_data.desc_lbl.data,
         user=user,
-        plan=1
+        plan=1,
+        ssh_key = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
     )
 
     #check if model was passed in
     if model != None:
         site = model
 
-
+    #do this here because I need to get the id of the site
     db.session.add(site)
     db.session.commit()
     container_name = f"user_{user.id}{user.fname[0]}{user.lname[0]}_site_{site.id}"
@@ -44,10 +48,10 @@ def create_site(user, form_data, model=None):
 
     #create index file
     with open(f"{host_path}/index.html", 'w') as file:
-        file.write(f'<h3>Index file for {container_name}</h3>')
+        file.write(f'<h3>Index file for {site.name_lbl}</h3>')
 
     volume_config = {
-        host_path: {'bind': f'/usr/local/apache2/htdocs/', 'mode': 'rw'}
+        host_path: {'bind': f'/var/www/html/', 'mode': 'rw'}
     }
 
 
@@ -55,18 +59,47 @@ def create_site(user, form_data, model=None):
     client = docker.from_env()
 
     try:
+        #build the image
+        dockerfile = f'''
+FROM debian:bullseye
+
+RUN apt-get update && \
+    apt-get install -y apache2
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]
+'''
+        # TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+        image = client.images.build(
+            fileobj=io.BytesIO(dockerfile.encode('utf-8')),
+            rm=True,
+            tag='web_hosting_debian'
+        )[0]
+
         #run container
         container = client.containers.run(
-            "httpd:2.4",
-            name = container_name,
+            "web_hosting_debian",
+            name=container_name,
             detach=True,
-            volumes = volume_config,
-            labels = {
+            volumes=volume_config,
+            # ports={'22/tcp': '2022'},   #internal : external
+            labels={
                 'traefik.enable': 'true',
+
+                # HTTP labels
                 f'traefik.http.routers.{container_name}.rule': f'Host(`{form_data.host_name.data}`)',
                 f'traefik.http.routers.{container_name}.entrypoints': 'web',
+                f'traefik.http.services.{container_name}.loadbalancer.server.port': '80',
+
+                # TCP labels
+                # TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+                # f'traefik.tcp.routers.{container_name}.entrypoints': 'ssh',
+                # f'traefik.tcp.routers.{container_name}.rule': f'HostSNI(`{form_data.host_name.data}`)',
+                # f'traefic.tcp.routers.{container_name}.tls': 'false',
+                # f'traefik.tcp.services.{container_name}.loadbalancer.server.port': '22',
+                # f"traefik.tcp.routers.{container_name}.service": f"{container_name}@docker"
+
             },
-        )  #remove ports later
+        )  # remove ports later
 
         #save vars needed later
         container_id = container.attrs['Id']
@@ -74,6 +107,11 @@ def create_site(user, form_data, model=None):
 
     except docker.errors.APIError as e:
         print(f"Error with compose.create: {e}")
+
+        #delete the model stub instance, if the container was not created
+        db.session.delete(site)
+        db.session.commit()
+
         raise   #raise most recently caught exception
     finally:
         client.close()

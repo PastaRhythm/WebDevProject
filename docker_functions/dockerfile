@@ -1,0 +1,22 @@
+#creates an image running both apache web server and openssh-server, allowing password auth for ssh
+
+FROM debian:bullseye
+
+#install openssh-server and Apache
+RUN apt-get update && \
+    apt-get install -y apache2 openssh-server && \
+    rm -rf /var/lib/apt/lists/*
+
+#.create the ssh privilege separation directory
+RUN mkdir -p /var/run/sshd
+
+#configure SSH server (mostly to allow password auth)
+RUN echo 'root:{site.ssh_key}' | chpasswd 
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+#start Apache and SSH
+CMD ["/bin/bash", "-c", "/etc/init.d/apache2 start"]

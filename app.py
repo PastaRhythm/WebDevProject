@@ -22,6 +22,10 @@ import json
 from constants import TRAEFIK_CONTAINER_NAME
 from database_manager import User, Website, db, seed_db
 
+#socketio and paramiko for in-browser terminal
+from flask_socketio import SocketIO, emit
+import paramiko
+
 #traefik router class
 class TraefikApp(Flask):
 	def __init__(self, *args, **kwargs):
@@ -46,21 +50,34 @@ class TraefikApp(Flask):
 			print("Creating traefik container!")
 			try:
 				_ = client.containers.run(
-					"traefik:latest",
+					"traefik:v2.6",
 					name = TRAEFIK_CONTAINER_NAME,
 					detach=True,
-					ports={'80/tcp': '80'},
+					ports={
+						'80/tcp': '80',
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME
+						#'22/tcp': '2002'
+					},	#internal : external
 					command = [
 						"--api.insecure=true",
 						"--providers.docker=true",
 						"--providers.docker.exposedbydefault=false",
-						"--entrypoints.web.address=:80"
+
+						"--entrypoints.web.address=:80",
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME (https://community.traefik.io/t/ssh-proxy-from-traefik-to-lxc/608)
+						#"--entrypoints.ssh.address=:22"			#INTERNAL
 					],
 					labels = {
 						'traefik.enable': 'true',
-						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',
+
+						'traefik.http.routers.traefik.service': 'api@internal',
+						'traefik.http.routers.traefik.rule': 'Host(`localhost`)',	#directs me to traefik dashboard
 						'traefik.http.routers.traefik.entrypoints': 'web',
-						'traefik.http.routers.traefik.service': 'api@internal'
+
+						# TURNS OUT, TRAEFIK CANT ROUTE SSH TRAFFIC BASED ON DOMAIN NAME
+						# f'traefik.tcp.routers.traefik.rule': f'HostSNI(`localhost`)',
+                		# f'traefik.tcp.routers.traefik.entrypoints': 'ssh',
+                		# f'traefik.tcp.services.traefik.loadbalancer.server.port': '22',
 					},
 					volumes = {
 						"/var/run/docker.sock": {'bind': f"/var/run/docker.sock", 'mode': 'rw'}
@@ -122,7 +139,7 @@ class TraefikApp(Flask):
 						create_site(website.user, tmp, model=website)
 						#^pass model in to prevent creation of a new model
 					except docker.errors.APIError as e:
-						print(f"Error creating '{container.name}' container: {e}")
+						print(f"Error creating user web container: {e}")
 						#raise   #raise most recently caught exception
 
 				finally:
@@ -131,6 +148,7 @@ class TraefikApp(Flask):
 
 # configure this web application
 app = TraefikApp(__name__)
+socketio = SocketIO(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = "ilovepenguinsveryverymuch"
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
@@ -249,10 +267,15 @@ def new_site():
 def handle_new_site():
 	form = NewSiteForm()
 	if form.validate():
-		success = create_site(current_user, form)
+		try:
+			success = create_site(current_user, form)
+		except docker.errors.APIError as e:
+			print(e)
+			flash("Cannot create another site for you right now, please report this and try again later!")
+			return redirect(url_for('dashboard'))
 		if (success):
 			# TODO: Have some nicer confirmation after creation
-			return redirect(url_for('show_sites'))
+			return redirect(url_for('dashboard'))
 		else:
 			flash("Site could not be created")
 			return redirect(url_for('new_site'))
@@ -266,7 +289,7 @@ def handle_new_site():
 @login_required
 def handle_del_site(site_id: int):
 	site = Website.query.get(site_id)
-	if site.user_id != current_user.id:
+	if site == None or site.user_id != current_user.id:
 		flash("You do not have permission to modify this website.")
 		return redirect(url_for("dashboard"))
 	
@@ -635,6 +658,121 @@ def shared_users_json(site_id: int):
 
 	#return the json string
 	return json_data
+
+#in-browser terminal implementation
+# def get_ssh_client():
+# 	'''gets the user's ssh client, or creates it if it doesn't exist'''
+# 	if 'ssh_client' not in session:
+# 		print("creating new ssh client!")
+# 		session['ssh_client'] = paramiko.SSHClient()
+# 		session['ssh_client'].set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# 		try:
+# 			session['ssh_client'].connect('jacob-t-graham.com', username='####', password='####')
+# 		except paramiko.ssh_exception.AuthenticationException:
+# 			print("SSH authentication failed.")
+# 			#close connection
+# 			if isinstance(session['ssh_client'], paramiko.SSHClient):
+# 				session['ssh_client'].close()
+			
+# 			#do not continue in the function call
+# 			raise
+# 	print(session['ssh_client'])
+# 	return session['ssh_client']
+
+#handle socketio connection
+@socketio.on('connect')
+def handle_io_terminal_connect(data):
+	print("New connection received!")
+	# try:
+	# 	ssh = get_ssh_client()
+	# 	print(f"ssh {ssh}")
+	# except paramiko.ssh_exception.AuthenticationException:
+	# 	#notify client of failure
+	# 	emit("auth_failure", {
+	# 		'stdout': "",
+	# 		'stderr': "Authentication failed!\n"
+	# 	})
+
+		
+			
+
+#handle socketio disconnection
+@socketio.on('disconnect')
+def handle_io_terminal_disconnect():
+	print("Connection lost!")
+	# ssh = get_ssh_client()
+	# ssh.close()
+	# print(f"ssh {ssh}")
+
+#handle command received
+@socketio.on("command")
+def handle_io_terminal_command(data):
+	print(f"Command received: {data.get('command')}")
+
+	
+	#try:
+		#get ssh client
+		# ssh = get_ssh_client()
+	
+
+		#TODO: THERE IS SOME BUG BELOW, THAT IS WHY I JUST CATCH EXCEPTION FOR NOW!
+		#send the command, and get results
+		# if isinstance(ssh, paramiko.SSHClient):
+		# 	_stdin, _stdout,_stderr = ssh.exec_command(data.get('command'))
+		# 	out = _stdout.read().decode()
+		# 	err = _stderr.read().decode()
+	# except Exception:
+	# 	#notify client of failure
+	# 	print("an error occurred!")
+	# 	emit("auth_failure", {
+	# 		'stdout': "",
+	# 		'stderr': "Authentication failed!\n"
+	# 	})
+	try:
+		#get website
+		website = Website.query.get(data.get('site_id'))
+		#print(f"Website: {website}")
+
+		#see if it is shared with the curr user
+		is_shared = False
+		for share in website.shared_with:
+			if share.user == current_user.id:
+				is_shared = True
+				break
+
+		#see if user can run commands
+		if current_user.id == website.user_id or is_shared:
+
+				#get the container
+				client = docker.from_env()
+				container = client.containers.get(website.name)
+
+				#run the command
+				exec_instance = container.exec_run(cmd=data.get('command'), stdout=True, stderr=True, tty=True)
+
+				#get results
+				output = exec_instance.output.decode('utf-8').strip()
+				#error = exec_instance.stderr.decode('utf-8').strip()
+
+				#return the output
+				emit("command", {
+					'stdout': output,
+					'stderr': ""#error
+				})
+		else: 
+			#auth failed if here
+			emit("auth_failure", {
+				'stdout': "",
+				'stderr': "Authentication failed!\n"
+			})
+	except Exception as e:
+		#something went wrong if here
+		print(f"Command error: {e}")
+		emit("command", {
+				'stdout': "",
+				'stderr': "Command not received by server!\n"
+			})
+	
 
 if __name__ == '__main__':
 	seed_db(app)
