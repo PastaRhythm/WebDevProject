@@ -90,7 +90,7 @@ async function fetch_user_sites(){
     const response = await fetch(endpoint)
     const websites = await validateJSON(response)
     console.log(websites)
-    console.log("done")
+    ////console.log("done")
 
     //clear current children, and add loader
     user_websites_tbody.innerHTML = ""  //clear all children
@@ -164,21 +164,30 @@ async function fetch_user_sites(){
         upload_icon.classList.add('ml-2')
         upload_icon.dataset.site_id = website.id
         upload_icon.addEventListener('click', async (event) => {
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
             await fetch_upload_form(event)
             update_uploaded_file_name()
         })
         card_actions.appendChild(upload_icon)
 
         //add terminal link
-        const terminal_link = document.createElement('a')
         const terminal_icon = document.createElement('i')
+        terminal_icon.dataset.site_id = website.id
+        terminal_icon.dataset.name_lbl = website.name_lbl    //for displaying in the terminal
         terminal_icon.classList.add('fa-terminal')
         terminal_icon.classList.add('fa-solid')
         terminal_icon.classList.add('link_btn')
-        terminal_link.appendChild(terminal_icon)
-        terminal_link.classList.add('ml-2')
-        terminal_link.href = `/terminal/${website.id}/`
-        card_actions.appendChild(terminal_link)
+        terminal_icon.classList.add('ml-2')
+        terminal_icon.addEventListener('click', async (event)=>{
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
+            await fetch_site_terminal(event)
+            init_terminal_socketio(event)
+        })
+        card_actions.appendChild(terminal_icon)
         
 
         //Add share link
@@ -189,6 +198,9 @@ async function fetch_user_sites(){
         share_icon.classList.add('ml-2')
         share_icon.dataset.site_id = website.id
         share_icon.addEventListener('click', async (event) => {
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
             await fetch_share_site_form(event)
             fill_shared_with_table()
         })
@@ -202,6 +214,9 @@ async function fetch_user_sites(){
         plan_icon.classList.add('ml-2')
         plan_icon.dataset.site_id = website.id
         plan_icon.addEventListener('click', async (event) => {
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
             await fetch_plan_site_form(event)
             initialPlanSetup()
         })
@@ -277,7 +292,7 @@ async function fetch_shared_sites(){
     const response = await fetch(endpoint)
     const websites = await validateJSON(response)
     console.log(websites)
-    console.log("done")
+    //console.log("done")
 
     //clear current children, and add loader
     user_websites_tbody.innerHTML = ""  //clear all children
@@ -351,21 +366,30 @@ async function fetch_shared_sites(){
         upload_icon.classList.add('ml-2')
         upload_icon.dataset.site_id = website.id
         upload_icon.addEventListener('click', async (event) => {
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
             await fetch_upload_form(event)
             update_uploaded_file_name()
         })
         card_actions.appendChild(upload_icon)
 
         //add terminal link
-        const terminal_link = document.createElement('a')
         const terminal_icon = document.createElement('i')
+        terminal_icon.dataset.site_id = website.id
+        terminal_icon.dataset.name_lbl = website.name_lbl    //for displaying in the terminal
         terminal_icon.classList.add('fa-terminal')
         terminal_icon.classList.add('fa-solid')
         terminal_icon.classList.add('link_btn')
-        terminal_link.appendChild(terminal_icon)
-        terminal_link.classList.add('ml-2')
-        terminal_link.href = `/terminal/${website.id}/`
-        card_actions.appendChild(terminal_link)
+        terminal_icon.classList.add('ml-2')
+        terminal_icon.addEventListener('click', async (event)=>{
+            if (window.cssuper.intervalID != 0) {
+                clearInterval(window.cssuper.intervalID);
+            }
+            await fetch_site_terminal(event)
+            init_terminal_socketio(event)
+        })
+        card_actions.appendChild(terminal_icon)
 
         //add tr to body
         user_websites_tbody.appendChild(card)
@@ -391,7 +415,7 @@ async function fetch_upload_form(event){
     const response = await fetch(endpoint)
     const body_content = await response.text()
     console.log(body_content)
-    console.log("done")
+    //console.log("done")
 
     //set body innerhtml
     dashboard_body.innerHTML = body_content
@@ -424,7 +448,7 @@ async function fetch_share_site_form(event){
     const response = await fetch(endpoint)
     const body_content = await response.text()
     console.log(body_content)
-    console.log("done")
+    //console.log("done")
 
     //set body innerhtml
     dashboard_body.innerHTML = body_content
@@ -445,7 +469,7 @@ async function fill_shared_with_table() {
     const response = await fetch(endpoint)
     const users = await validateJSON(response)
     console.log(users)
-    console.log("done")
+    //console.log("done")
 
     //clear current children, and add loader
     shared_body.innerHTML = ""  //clear all children
@@ -530,7 +554,7 @@ async function fetch_plan_site_form(event){
     const response = await fetch(endpoint)
     const body_content = await response.text()
     console.log(body_content)
-    console.log("done")
+    //console.log("done")
 
     //set body innerhtml
     dashboard_body.innerHTML = body_content
@@ -703,3 +727,133 @@ async function update_shared_sites_status() {
 }
 
 //end functions for updating container status
+//functions for displaying terminal in dashboard
+async function fetch_site_terminal(event){
+    const dashboard_body = document.getElementById('dashboard_body')
+    const endpoint = `/terminal/` + event.target.dataset.site_id
+    console.log(endpoint)
+
+    //add loader
+    dashboard_body.innerHTML = ""
+    dashboard_body.appendChild(create_loader())
+
+    //get data
+    const response = await fetch(endpoint)
+    const body_content = await response.text()
+    console.log(body_content)
+
+    //set body innerhtml
+    dashboard_body.innerHTML = body_content
+}
+
+function init_terminal_socketio(event){
+    //create terminal
+    var term = new Terminal();
+    term.open(document.getElementById('terminal'));
+
+    //add prompt function
+    //add function to prompt user for input
+    term.prompt = function(){
+        term.write("\r\n$ ")
+    }
+
+    //greet the user
+    //term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+    term.write("Greetings from \x1B[1;3;32m" + event.target.dataset.name_lbl + "!\x1B[0m")
+    term.prompt()
+
+    //store terminal contents
+    var entries = []
+    var curr_line = ""
+    var prev_cmd_idx = 1
+
+    //respond to keys being pressed
+    term.on('key', (key, event)=>{
+        //index of prev command to get on up key pressed
+        
+        
+        //enter key
+        if (event.keyCode === 13){
+            //save entries
+            entries.push(curr_line)
+
+            //send command to server
+            send_command(curr_line)
+
+            //clear out curr_line to prepare for next command
+            curr_line = ""
+            term.write("\r\n")
+        }
+        //backspace key
+        else if (event.keyCode === 8){
+            curr_line = curr_line.slice(0, curr_line.length-1)
+            
+        }
+        //up arrow key
+        else if (event.keyCode === 38){
+            return  //dont let them go back up
+        }
+        //down arrow key
+        else if (event.keyCode === 40){
+            return  //dont let them go down
+        }
+        //other keys
+        else {
+            curr_line += key
+            term.write(key)
+        }
+    })
+
+
+    //create window terminal object
+    window.cssuper.browser_terminal = {}
+    window.cssuper.browser_terminal.socket = io.connect("/");
+    window.cssuper.browser_terminal.terminal = term
+    window.cssuper.browser_terminal.site_id = event.target.dataset.site_id
+
+    //do this when connection is successful
+    window.cssuper.browser_terminal.socket.on("connect", join)
+
+    //do this when output from a command is received
+    window.cssuper.browser_terminal.socket.on('command', receive_results)
+
+    //do this when auth failure is received
+    window.cssuper.browser_terminal.socket.on("auth_failure", auth_failure)
+}
+
+
+
+
+//socketio functions
+function join() {
+    // log the successful connection and the socket's id
+    console.log(`Connected: Socket ${ window.cssuper.browser_terminal.socket.id}`);
+}
+
+//functions for sending and receiving terminal io
+function send_command(command){
+    //send message
+    window.cssuper.browser_terminal.socket.emit('command',{
+        'site_id': window.cssuper.browser_terminal.site_id,
+        'command': command,
+    })
+}
+
+function receive_results(data){
+    //if command failed
+    if (data.stderr){
+        window.cssuper.browser_terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
+    }
+    //if command succeeded
+    else if (data.stdout){
+        window.cssuper.browser_terminal.terminal.write(data.stdout.replace(/(\r|\n)/g, "\r\n"))
+    }
+
+    //prompt for next input
+    window.cssuper.browser_terminal.terminal.prompt()
+}
+
+function auth_failure(data){
+    window.cssuper.browser_terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
+}
+//end functions for displaying terminal in dashboard

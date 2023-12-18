@@ -38,4 +38,10 @@ Note that the initial websites inserted in the seeder will not have valid links.
 Currently, our site ui is not beautiful.  This is because most of our work was on backend features.
 This will improve.  Also, we will obviously be fixing many bugs over the coming weeks.
 
+Also note that the upload feature of our app utilizes features of Python that have been discoverd to
+contain bugs in the language.  These issues have been fixed, but if you run an older version of Python,
+you may experience an error like "Couldn't unzip: 'SpooledTemporaryFile' object has no attribute 'seekable'".
+This, once again, is a bug in the Python language, not our app.  We have confirmed that it has been fixed as 
+of Python 3.12.1.  For more info about this issue, read more here: https://bugs.python.org/issue26175.
+
 If there are any questions, let me know.

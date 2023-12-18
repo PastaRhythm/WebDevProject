@@ -2,9 +2,73 @@
 
 {% block body %}
 
-<h1>CSSuper</h1>
-<h2>Web hosting at a great price</h2>
-<br>
 
+
+<!-- Header -->
+<header class="hero is-link " style="padding:128px 16px">
+    <div class="is-link">
+      <h1 class="has-text-centered is-size-1">CSSuper</h1>
+      <p class=" has-text-centered is-size-5">Web Hosting at a great price</p>
+      <div class="is-flex is-justify-content-space-around pt-4">
+        {% if current_user.is_authenticated %}
+            <a class="button is-primary" href="{{ url_for('dashboard') }}">Dashboard</a>
+        {% else %}
+            <a class="button is-primary" href="{{ url_for('login') }}">Get Started</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  
+  <!-- First Grid -->
+    <div class="level py-4 px-2">
+      <div class="column is-two-thirds is-justify-content-flex-end">
+        <h1 class = "is-size-2">Web hosting made <i>simple</i>.</h1>
+        <hr>
+        <h5 class="is-size-4">CSSuper puts the power in your hands, allowing you to manage the hosting of your website from one sleek dashboard.</h5>
+        <br>
+        <p class="has-text-grey">Web hosting is hard.  And confusing.  And frustrating.  But it doesn't have to be this way.  With CSSuper, easy, isolated, secure web hosting is just a few clicks away!  With your website securely hosted and managed on the CSSuper Dashboard, you are freed to spend your valuable time worrying about the tasks that truly matter to your organization.  Set up you configuration, and let us handle the technical details with CSSuper!</p>
+      </div>
+  
+      <div class="column is-one-third image is-104x104">
+        <img src = "{{ url_for('static', filename='/images/web_hosting.png') }}">
+      </div>
+    </div>
+  
+  <!-- Second Grid -->
+    <div class="level has-background-grey-lighter py-4 px-2">
+      <div class="column is-one-third image is-104x104">
+        <img src = "{{ url_for('static', filename='/images/box.png') }}">
+      </div>
+  
+      <div class="column is-two-thirds is-justify-content-flex-end">
+        <h1 class = "is-size-2">Join Us!</h1>
+        <hr>
+        <h5 class="is-size-4">Interested?</h5>
+        <p class="has-text-grey ">Sign up or register to supercharge your web hosting experience with CSSuper.</p>
+        <div class="level field is-grouped pt-2">
+            {% if current_user.is_authenticated %}
+                <a class="button is-primary" href="{{ url_for('dashboard') }}">Dashboard</a>
+            {% else %}
+                <a class="button is-primary" href="{{ url_for('login') }}">Login</a>
+                <h1 class="is-size-5 px-2">  or  </h1>
+                <a class="button is-primary" href="{{ url_for('register') }}">Sign Up</a>
+            {% endif %}
+        </div> 
+      </div>
+    </div>
+  
+  <footer class="footer has-background-grey has-text-centered">
+      <h1 class="is-size-6 has-text-light has-text-centered">By 
+        <a class="has-text-white" target="_blank" href="https://github.com/pastarhythm">Connor Felton ( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)</a>, 
+        <a class="has-text-white" target="_blank" href="https://jacob-t-graham.com">Jacob Graham ( ͡ʘ ͜ʖ ͡ʘ)</a>, and 
+        <a class="has-text-white" target="_blank" href="https://github.com/entropyrose">Christopher Tziovannis ( ＾◡＾)っ✂❤</a></h1>
+  </footer>
+  
+  <!-- Footer -->
+  <!-- <footer class="footer">  
+    <div class="content has-text-centered">
+      <p>Powered by <a href="https://bulma.io/" target="_blank">Bulma</a></p>
+   </div>
+  </footer> -->
 
 {% endblock %}
