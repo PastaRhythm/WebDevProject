@@ -170,6 +170,9 @@ def delete_site(site):
         raise
 
     #3) delete the model record from the db
+    shares = site.shared_with
+    for s in shares:
+        db.session.delete(s)
     db.session.delete(site)
     db.session.commit()
 
