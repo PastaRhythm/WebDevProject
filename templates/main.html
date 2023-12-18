@@ -47,7 +47,7 @@
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <article class="message is-danger" id="flash_message_errors" style="position: fixed; right: 10px; bottom: 0px;">
+            <article class="message is-danger" id="flash_message_errors" style="position: fixed; right: 10px; bottom: 0px; z-index: 1000000;">
                 <div class="message-header is-flex is-justify-content-space-between"><span>Problems were detected: </span>&nbsp;&nbsp;&nbsp;&nbsp;<button class="delete" aria-label="delete" onclick="document.getElementById('flash_message_errors').remove()"></button></div>
                 <div class="message-body" style="max-height: 10rem; overflow-y: auto;">
                     <ul>
