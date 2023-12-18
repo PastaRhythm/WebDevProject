@@ -24,7 +24,7 @@ from database_manager import User, Website, db, seed_db
 
 #socketio and paramiko for in-browser terminal
 from flask_socketio import SocketIO, emit
-import paramiko
+# import paramiko
 
 #traefik router class
 class TraefikApp(Flask):

@@ -2,31 +2,38 @@
 
 {% block body %}
 
-<a href="/">Cancel</a>
+<div class="columns">
+<div class="column is-half is-offset-one-quarter box">
 
-<form method="POST">
-    {{form.hidden_tag()}}
+    <h2 class="mb-5 is-size-4">Register</h2>
 
-    {{form.email.label}}
-    {{form.email()}}
-    <br>
-    {{form.password.label}}
-    {{form.password()}}
-    <br>
-    {{form.confirm_password.label}}
-    {{form.confirm_password()}}
-    <br>
-    {{form.fname.label}}
-    {{form.fname()}}
-    <br>
-    {{form.lname.label}}
-    {{form.lname()}}
-    <br>
-    {{form.billing_address.label}}
-    {{form.billing_address()}}
-    <br>
+    <form method="POST">
+        {{form.hidden_tag()}}
 
-    {{form.submit()}}
-</form>
+        {{form.email.label}}
+        {{form.email(class="input", type="email", placeholder="Email")}}
+        <br>
+        {{form.password.label}}
+        {{form.password(class="input", type="password", placeholder="Password")}}
+        <br>
+        {{form.confirm_password.label}}
+        {{form.confirm_password(class="input", type="password", placeholder="Confirm Password")}}
+        <br>
+        {{form.fname.label}}
+        {{form.fname(class="input", type="text", placeholder="First Name")}}
+        <br>
+        {{form.lname.label}}
+        {{form.lname(class="input", type="text", placeholder="Last Name")}}
+        <br>
+        {{form.billing_address.label}}
+        {{form.billing_address(class="textarea", placeholder="Billing Address")}}
+        <br>
+        <br>
+
+        {{form.submit(class="button is-link mb-4")}}
+    </form>
+
+</div>
+</div>
 
 {% endblock %}
