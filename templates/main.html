@@ -17,10 +17,10 @@
 </head>
 <body>
 
-    <div class="has-background-primary p-1 is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
+    <div id="app_top_bar" class="has-background-primary p-1 is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
         <a href="{{ url_for('index') }}" class="link_btn ml-2 is-flex is-flex-direction-row is-align-items-center"><img class="image is-32x32 mr-1" src="{{ url_for('static', filename='/images/logo.png') }}" alt="CSSuper Logo"><!--<i class="fa-solid fa-house"></i>--> Home</a>
     
-        <div class="is-flex is-flex-direction-row is-justify-content-flex-end">
+        <div class="is-flex is-flex-direction-row is-justify-content-flex-end mr-5">
     
             {% if current_user.is_authenticated %}
                 <a class="link_btn ml-1" href="{{ url_for('get_logout') }}">Log Out <i class="fa-solid fa-right-from-bracket"></i></a>
@@ -32,6 +32,16 @@
         
         </div>
     </div>
+
+    <style>
+        #app_top_bar{
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            z-index: 10000000;
+        }
+    </style>
 
 
 
