@@ -10,7 +10,7 @@
       <h1 class="has-text-centered is-size-1">CSSuper</h1>
       <p class=" has-text-centered is-size-5">Web Hosting at a great price</p>
       <div class="is-flex is-justify-content-space-around pt-4">
-        <button class="button is-primary ">Get Started</button>
+        <a class="button is-primary" href="{{ url_for('login') }}">Get Started</a>
       </div>
     </div>
   </header>
@@ -42,9 +42,9 @@
         <h5 class="is-size-4">Interested?</h5>
         <p class="has-text-grey ">Sign up or register to supercharge your web hosting experience with CSSuper.</p>
         <div class="level field is-grouped pt-2">
-          <button class="button is-primary">Login</button>
+          <a class="button is-primary" href="{{ url_for('login') }}">Login</a>
           <h1 class="is-size-5 px-2">  or  </h1>
-          <button class="button is-primary">Sign Up</button>
+          <a class="button is-primary" href="{{ url_for('register') }}">Sign Up</a>
         </div> 
       </div>
     </div>
