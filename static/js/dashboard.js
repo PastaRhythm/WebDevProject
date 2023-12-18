@@ -808,19 +808,19 @@ function init_terminal_socketio(event){
 
 
     //create window terminal object
-    window.terminal = {}
-    window.terminal.socket = io.connect("/");
-    window.terminal.terminal = term
-    window.terminal.site_id = event.target.dataset.site_id
+    window.cssuper.browser_terminal = {}
+    window.cssuper.browser_terminal.socket = io.connect("/");
+    window.cssuper.browser_terminal.terminal = term
+    window.cssuper.browser_terminal.site_id = event.target.dataset.site_id
 
     //do this when connection is successful
-    window.terminal.socket.on("connect", join)
+    window.cssuper.browser_terminal.socket.on("connect", join)
 
     //do this when output from a command is received
-    window.terminal.socket.on('command', receive_results)
+    window.cssuper.browser_terminal.socket.on('command', receive_results)
 
     //do this when auth failure is received
-    window.terminal.socket.on("auth_failure", auth_failure)
+    window.cssuper.browser_terminal.socket.on("auth_failure", auth_failure)
 }
 
 
@@ -829,14 +829,14 @@ function init_terminal_socketio(event){
 //socketio functions
 function join() {
     // log the successful connection and the socket's id
-    console.log(`Connected: Socket ${window.terminal.socket.id}`);
+    console.log(`Connected: Socket ${ window.cssuper.browser_terminal.socket.id}`);
 }
 
 //functions for sending and receiving terminal io
 function send_command(command){
     //send message
-    window.terminal.socket.emit('command',{
-        'site_id': window.terminal.site_id,
+    window.cssuper.browser_terminal.socket.emit('command',{
+        'site_id': window.cssuper.browser_terminal.site_id,
         'command': command,
     })
 }
@@ -844,18 +844,18 @@ function send_command(command){
 function receive_results(data){
     //if command failed
     if (data.stderr){
-        window.terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
+        window.cssuper.browser_terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
     }
     //if command succeeded
     else if (data.stdout){
-        window.terminal.terminal.write(data.stdout.replace(/(\r|\n)/g, "\r\n"))
+        window.cssuper.browser_terminal.terminal.write(data.stdout.replace(/(\r|\n)/g, "\r\n"))
     }
 
     //prompt for next input
-    window.terminal.terminal.prompt()
+    window.cssuper.browser_terminal.terminal.prompt()
 }
 
 function auth_failure(data){
-    window.terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
+    window.cssuper.browser_terminal.terminal.write("\x1B[1;3;31m" + data.stderr +"\x1B[0m".replace(/(\r|\n)/g, "\r\n"))
 }
 //end functions for displaying terminal in dashboard
