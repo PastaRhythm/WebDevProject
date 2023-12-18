@@ -1,8 +1,6 @@
-
-
-<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
-<br>
+<h1 class="is-size-4">Terminal for site "{{ site.name_lbl }}"</h1>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/xterm.css') }}">
+
 <div class="mx-6 p-1" id="terminal"></div>
 
 <details class="ml-6">
@@ -16,7 +14,5 @@
     </ul>
 </details>
 
-
-
-
-
+<br>
+<a href="{{ url_for('dashboard') }}" class="button">Back</a>
