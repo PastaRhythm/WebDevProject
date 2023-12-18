@@ -7,6 +7,8 @@ from flask_login import LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 import zipfile, shutil
 
+from sqlalchemy import exc
+
 #database
 from flask_sqlalchemy import SQLAlchemy
 
@@ -277,6 +279,10 @@ def handle_new_site():
 	if form.validate():
 		try:
 			success = create_site(current_user, form)
+		except exc.IntegrityError as e:
+			print(e)
+			flash("Couldn't create site: Host name is already used by a different site")
+			return redirect(url_for('dashboard'))
 		except docker.errors.APIError as e:
 			print(e)
 			flash("Cannot create another site for you right now, please report this and try again later!")

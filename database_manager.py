@@ -39,7 +39,7 @@ class Website(db.Model):
     docker_id = db.Column(db.Unicode, nullable=False)
     volume_path = db.Column(db.Unicode, nullable=False)
     image = db.Column(db.Unicode, nullable=False)
-    hostname = db.Column(db.Unicode, nullable=False)
+    hostname = db.Column(db.Unicode, nullable=False, unique=True)
     plan = db.Column(db.Integer, nullable=False) # 1 is basic, 2 is middle, 3 is top
     name_lbl = db.Column(db.Unicode, nullable=True)    #user-defined label to display in the site frontend
     desc_lbl = db.Column(db.Unicode, nullable=True)    #user-defined description to display on the site frontend
