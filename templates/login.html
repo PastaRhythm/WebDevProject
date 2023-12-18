@@ -2,19 +2,26 @@
 
 {% block body %}
 
-<a href="/">Cancel</a>
+<div class="columns">
+<div class="column is-half is-offset-one-quarter box">
 
-<form method="POST">
-    {{form.hidden_tag()}}
+    <h2 class="mb-5 is-size-4">Log In</h2>
 
-    {{form.email.label}}
-    {{form.email()}}
-    <br>
-    {{form.password.label}}
-    {{form.password()}}
-    <br>
-    
-    {{form.submit()}}
-</form>
+    <form method="POST">
+        {{form.hidden_tag()}}
+
+        {{form.email.label}}
+        {{form.email(class="input", type="email", placeholder="Email")}}
+        <br>
+        {{form.password.label}}
+        {{form.password(class="input", type="password", placeholder="Password")}}
+        <br>
+        <br>
+        
+        {{form.submit(class="button is-link mb-4")}}
+    </form>
+
+</div>
+</div>
 
 {% endblock %}
