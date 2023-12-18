@@ -232,7 +232,15 @@ def handle_register():
 			)
 			db.session.add(user)
 			db.session.commit()
-			return redirect(url_for('login'))
+			
+			# log this user in through the login_manager
+			login_user(user)
+			# redirect the user to the page they wanted or the home page
+			next = request.args.get('next')
+			if next is None or not next.startswith('/'):
+				next = url_for('dashboard')
+			return redirect(next)
+
 		else: # if the user already exists
 			# flash a warning message and redirect to get registration form
 			flash('There is already an account with that email address')
