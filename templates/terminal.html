@@ -5,7 +5,18 @@
 <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 <br>
 
-<div class="mx-6" id="terminal"></div>
+<div class="mx-6 p-1" id="terminal"></div>
+
+<details class="ml-6">
+    <summary>Terminal Notes</summary>
+    <ul class="content">
+        <li>Remember to run <code>apt-get update</code> to update package lists on a new site.</li>
+        <li>Stateful commands, like <code>cd</code> and <code>nano</code>, are not yet supported.</li>
+        <li>Don't forget to add a <code>-y</code> to your <code>apt install</code> commands.</li>
+        <li>Remember that the terminal is in an experimental stage, so all functions are not supported.</li>
+        <li>Make sure your github repo is set to public before cloning into the <code>/var/www/html/</code> directory to avoid an issue with a stateful command.</li>
+    </ul>
+</details>
 
 
 
