@@ -750,7 +750,7 @@ def handle_io_terminal_command(data):
 		#see if it is shared with the curr user
 		is_shared = False
 		for share in website.shared_with:
-			if share.user == current_user.id:
+			if share.user.id == current_user.id:
 				is_shared = True
 				break
 
